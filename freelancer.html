@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>ApexCore Freelancer Portal | Specialist Workspace &amp; Operations</title>
+  <meta name="description" content="Dedicated enterprise freelancer portal for ApexCore SaaS. Manage assigned projects, track progress, log timesheets, and request milestone disbursements in INR.">
+  <meta name="theme-color" content="#09090b">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Core Base Styles & Freelancer Dedicated Styles -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="freelancer.css">
+</head>
+<body class="freelancer-body">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- ======================================================== -->
+  <!-- 1. FREELANCER LOGIN VIEW                                 -->
+  <!-- ======================================================== -->
+  <section id="freelancer-login-view" class="login-container" aria-label="Freelancer Authentication">
+    <div class="login-bg-effects" aria-hidden="true">
+      <div class="glow-orb orb-1"></div>
+      <div class="glow-orb orb-2"></div>
+      <div class="grid-overlay"></div>
+    </div>
+
+    <div class="login-card-wrapper">
+      <div class="login-card" id="freelancer-login-card">
+        <!-- Brand Header -->
+        <div class="login-brand">
+          <div class="brand-emblem">
+            <svg class="emblem-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="20,2 38,12 38,28 20,38 2,28 2,12" stroke="#e50914" stroke-width="2" fill="url(#freelancerHexGrad)"/>
+              <path d="M12 20L18 26L28 14" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <defs>
+                <linearGradient id="freelancerHexGrad" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#241014"/>
+                  <stop offset="1" stop-color="#0c0c0e"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="emblem-pulse"></span>
+          </div>
+          <h1 class="portal-title">Freelancer Portal</h1>
+          <p class="portal-subtitle">Specialist Workspace &amp; Delivery Hub</p>
+          <div class="rbac-pill">
+            <span class="rbac-dot"></span>
+            <span>VERIFIED TALENT &bull; SECURE WORKSPACE</span>
+          </div>
+        </div>
+
+        <!-- Error State Banner (Hidden by default) -->
+        <div id="freelancer-login-error" class="login-alert hidden" role="alert" aria-live="assertive">
+          <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          <div class="alert-content">
+            <strong class="alert-title">Access Denied</strong>
+            <span class="alert-message">Invalid Freelancer ID or Security Pass.</span>
+          </div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="freelancer-login-form" class="login-form" onsubmit="window.executeFreelancerLogin(event); return false;" autocomplete="off" novalidate>
+          <!-- Email / ID Input Group -->
+          <div class="form-group">
+            <label for="fl-login-email" class="form-label">Freelancer ID or Email</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+              </span>
+              <input 
+                type="text" 
+                id="fl-login-email" 
+                class="form-control" 
+                placeholder="e.g. aarav.sharma@freelance.apex.com or FL-101" 
+                required 
+                spellcheck="false"
+                autocomplete="username"
+              >
+            </div>
+            <span class="hint-text">Use your issued Freelancer ID (FL-101) or email</span>
+          </div>
+
+          <!-- Password Input Group -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="fl-login-password" class="form-label">Issued Security Pass</label>
+              <span class="key-indicator">256-bit TLS</span>
+            </div>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                  <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                </svg>
+              </span>
+              <input 
+                type="password" 
+                id="fl-login-password" 
+                class="form-control" 
+                placeholder="••••••••••••" 
+                required 
+                autocomplete="current-password"
+              >
+              <button 
+                type="button" 
+                id="fl-toggle-password" 
+                class="password-toggle-btn" 
+                aria-label="Toggle password visibility" 
+                title="Show or hide password"
+              >
+                <svg class="eye-icon eye-open" viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                </svg>
+                <svg class="eye-icon eye-closed hidden" viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                  <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" />
+                  <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Options Row -->
+          <div class="form-row-options">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="fl-remember-me" checked>
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Keep specialist session active</span>
+            </label>
+            <span class="security-status-tag">
+              <span class="status-shield-dot"></span>
+              Encrypted
+            </span>
+          </div>
+
+          <!-- Submit Action Button -->
+          <button type="button" id="btn-fl-login-submit" class="btn-primary-red" onclick="window.executeFreelancerLogin(event);">
+            <span class="btn-shine"></span>
+            <span class="btn-text">Access Specialist Portal</span>
+            <svg class="btn-arrow" viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </form>
+
+
+        <!-- Switch to Admin View link -->
+        <div style="margin-top: 12px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+          <a href="index.html" style="font-size: 12px; color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+            <span>Are you a Platform Administrator?</span>
+            <span style="color: var(--red-ember); font-weight: 600;">Go to Admin Portal (index.html) &rarr;</span>
+          </a>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="login-card-footer" style="margin-top: 10px;">
+          <div class="security-badges">
+            <span>SOC2 Type II Certified</span>
+            <span class="footer-sep">&bull;</span>
+            <span>Zero-Trust Architecture</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 2. FULL-PAGE CINEMATIC LOADING ANIMATION                -->
+  <!-- ======================================================== -->
+  <div id="freelancer-cinematic-loader" class="cinematic-overlay hidden" aria-hidden="true" role="dialog">
+    <canvas id="fl-loader-canvas" class="loader-canvas"></canvas>
+    <div class="cinematic-pod">
+      <div class="portal-ring ring-outer"></div>
+      <div class="portal-ring ring-mid"></div>
+      <div class="portal-ring ring-inner"></div>
+
+      <div class="cinematic-emblem-wrap">
+        <div class="emblem-core">
+          <svg class="cinematic-logo-svg" viewBox="0 0 64 64" fill="none">
+            <polygon points="32,4 58,18 58,46 32,60 6,46 6,18" stroke="#e50914" stroke-width="2" fill="#09090c"/>
+            <polygon points="32,12 50,22 50,42 32,52 14,42 14,22" stroke="rgba(229, 9, 20, 0.4)" stroke-width="1.5" fill="#131318"/>
+            <polygon points="32,20 42,26 42,38 32,44 22,38 22,26" fill="#e50914"/>
+          </svg>
+        </div>
+
+        <!-- Futuristic Circular SVG Progress Ring -->
+        <svg class="progress-ring-svg" width="160" height="160">
+          <circle class="progress-ring-bg" cx="80" cy="80" r="72" />
+          <circle id="fl-progress-ring-circle" class="progress-ring-stroke" cx="80" cy="80" r="72" />
+        </svg>
+      </div>
+
+      <!-- Percentage & Status Stream -->
+      <div class="loader-metrics">
+        <div class="percentage-display">
+          <span id="fl-loader-percentage">0</span><span class="pct-symbol">%</span>
+        </div>
+        
+        <div class="status-stage-wrapper">
+          <div class="radar-scan-line"></div>
+          <p id="fl-loader-status-text" class="loader-status-text">Authenticating Specialist...</p>
+        </div>
+
+        <!-- System Node Breadcrumb -->
+        <div class="loader-stages-indicator">
+          <span class="stage-pip active" data-stage="1"></span>
+          <span class="stage-pip" data-stage="2"></span>
+          <span class="stage-pip" data-stage="3"></span>
+          <span class="stage-pip" data-stage="4"></span>
+          <span class="stage-pip" data-stage="5"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 3. FREELANCER SPECIALIST WORKSPACE VIEW                  -->
+  <!-- ======================================================== -->
+  <div id="freelancer-workspace-view" class="dashboard-shell hidden">
+
+    <!-- LEFT COLLAPSIBLE SIDEBAR -->
+    <aside id="sidebar" class="admin-sidebar" aria-label="Freelancer Navigation">
+      <!-- Sidebar Header & Brand -->
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-mini-emblem">
+            <svg viewBox="0 0 28 28" fill="none" width="24" height="24">
+              <path d="M14 2L26 7.5V14C26 21 21 25.5 14 27C7 25.5 2 21 2 14V7.5L14 2Z" fill="#18181f" stroke="#e50914" stroke-width="1.6"/>
+              <path d="M10 14L13 17L18 11" stroke="#ff2a4b" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="brand-names">
+            <span class="brand-title">ApexCore</span>
+            <span class="brand-tag">Specialist</span>
+          </div>
+        </div>
+        <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" aria-label="Toggle sidebar collapse" title="Fold / Unfold Sidebar">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <button id="sidebar-mobile-close-btn" class="sidebar-mobile-close-btn" aria-label="Close navigation sidebar" title="Fold Sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">SPECIALIST WORKSPACE</div>
+        <ul class="nav-list" role="menubar">
+          
+          <!-- 1. Assigned Projects & Work -->
+          <li class="nav-item">
+            <button class="nav-link active" data-tab="assigned-projects" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </span>
+              <span class="nav-label">Assigned Work</span>
+              <span class="nav-counter" id="badge-my-projects">0</span>
+            </button>
+          </li>
+
+          <!-- 2. Financials & Disbursements -->
+          <li class="nav-item">
+            <button class="nav-link" data-tab="finances" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+              </span>
+              <span class="nav-label">Financials &amp; Payouts</span>
+              <span class="nav-counter" id="badge-my-payouts">0</span>
+            </button>
+          </li>
+
+          <!-- 3. Timesheet / Log Hours -->
+          <li class="nav-item">
+            <button class="nav-link" data-tab="timesheet" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </span>
+              <span class="nav-label">Log Hours / Timesheet</span>
+            </button>
+          </li>
+
+          <!-- 4. Profile & Skills -->
+          <li class="nav-item">
+            <button class="nav-link" data-tab="profile" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </span>
+              <span class="nav-label">Profile &amp; Skills</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card">
+          <div class="user-avatar-wrap">
+            <div class="avatar-ring"></div>
+            <div class="user-avatar" id="sidebar-fl-avatar">F</div>
+          </div>
+          <div class="user-details">
+            <span class="user-name" id="sidebar-fl-name">Specialist</span>
+            <span class="user-role" id="sidebar-fl-skill">Web Development</span>
+          </div>
+          <button id="btn-sidebar-fl-logout" class="quick-logout-btn" title="Sign Out" aria-label="Sign Out">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- SIDEBAR BACKDROP FOR MOBILE -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+    <!-- MAIN DASHBOARD CONTENT AREA -->
+    <main class="dashboard-main">
+
+      <!-- MODERN TOP NAVIGATION BAR -->
+      <header class="dashboard-topbar">
+        <div class="topbar-left">
+          <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Open mobile navigation menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="view-breadcrumb">
+            <span class="breadcrumb-root">Specialist Workspace</span>
+            <span class="breadcrumb-sep">/</span>
+            <span id="current-view-title" class="breadcrumb-current">Assigned Work</span>
+          </div>
+        </div>
+
+        <!-- Center Search Omnibar -->
+        <div class="topbar-search">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input type="text" id="fl-global-search" placeholder="Search my projects, deliverables, milestones...">
+          </div>
+        </div>
+
+        <!-- Right System Indicators -->
+        <div class="topbar-right">
+          <!-- Live Clock -->
+          <div class="time-badge">
+            <span class="clock-icon">&#9679;</span>
+            <span id="live-time">13:17:00</span>
+            <span class="badge-timezone">UTC+5:30</span>
+          </div>
+
+          <!-- Switch to Admin Dashboard link -->
+          <a href="index.html" class="topbar-icon-btn" title="Open Admin Portal" style="display:inline-flex; align-items:center; gap:5px; text-decoration:none; padding: 0 10px; width:auto; border-radius: 20px; font-size:11px; font-weight:600; border:1px solid rgba(255,255,255,0.12); color: var(--text-secondary); background: rgba(255,255,255,0.03);">
+            <span>Admin Portal</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </a>
+
+          <!-- Profile Pill & Logout -->
+          <div class="topbar-user-pill">
+            <div class="topbar-avatar">
+              <span id="topbar-fl-avatar">S</span>
+              <span class="avatar-online-dot"></span>
+            </div>
+            <div class="topbar-user-meta">
+              <span class="topbar-name" id="topbar-fl-name">Specialist</span>
+              <span class="topbar-badge" id="topbar-fl-skill-badge">Freelancer</span>
+            </div>
+            <button id="btn-topbar-fl-logout" class="topbar-logout-btn" title="Sign Out of Portal" aria-label="Sign out">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+              </svg>
+              <span class="logout-text">Logout</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- ==================================================== -->
+      <!-- TAB 1: ASSIGNED PROJECTS & WORK                      -->
+      <!-- ==================================================== -->
+      <section id="tab-assigned-projects" class="content-tab active-tab">
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">My Assigned Projects &amp; Deliverables</h2>
+            <p class="page-subtitle">Track your project milestones, update live delivery progress %, and submit deliverable notes to Platform Admin.</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn-primary-red-sm" id="btn-quick-log-hours">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+              </svg>
+              Log Work Hours
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Summary Metrics -->
+        <div class="subpage-metric-strip">
+          <div class="sub-metric">
+            <span class="sub-label">Active Assigned Projects</span>
+            <span class="sub-value font-mono text-green" id="fl-kpi-active-projects">0</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Avg Milestone Completion</span>
+            <span class="sub-value font-mono" id="fl-kpi-avg-progress">0%</span>
+          </div>
+          <div class="sub-metric highlight-warning">
+            <span class="sub-label">Pending Payout Due (INR)</span>
+            <span class="sub-value font-mono text-crimson" id="fl-kpi-pending-due">₹0</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Total Cleared Earnings (INR)</span>
+            <span class="sub-value font-mono text-green" id="fl-kpi-cleared-payouts">₹0</span>
+          </div>
+        </div>
+
+        <!-- Projects Grid Container -->
+        <div class="projects-grid-container" id="freelancer-projects-grid">
+          <!-- Dynamically populated cards -->
+        </div>
+      </section>
+
+      <!-- ==================================================== -->
+      <!-- TAB 2: FINANCIALS & DISBURSEMENTS (PAYOUTS)         -->
+      <!-- ==================================================== -->
+      <section id="tab-finances" class="content-tab">
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">Financials &amp; Milestone Disbursements</h2>
+            <p class="page-subtitle">Track your project earnings in INR (₹), view paid statements, and submit milestone disbursement requests.</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn-primary-red-sm" id="btn-open-request-payout-modal">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+              </svg>
+              Request Milestone Payout (₹)
+            </button>
+          </div>
+        </div>
+
+        <!-- Financial KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Total Cleared Earnings</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value" id="fin-kpi-cleared">₹0</span>
+              <span class="kpi-delta positive">Direct Transfer</span>
+            </div>
+          </div>
+
+          <div class="kpi-card accent-glow">
+            <div class="kpi-top">
+              <span class="kpi-title">Current Due / In Escrow</span>
+              <div class="kpi-icon-wrap red-glow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value" id="fin-kpi-due">₹0</span>
+              <span class="kpi-subtag">Pending Release</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-title">Assigned Projects Value</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value" id="fin-kpi-total-budget">₹0</span>
+              <span class="kpi-subtag">Across All Sprints</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disbursements & Payout Table -->
+        <div class="table-card" style="margin-top: 24px;">
+          <div class="card-header-bar" style="padding: 16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-subtle);">
+            <h3 style="font-size: 15px; font-weight: 700;">Disbursement History &amp; Milestone Receipts</h3>
+            <span class="badge-tag">INR Currencies</span>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Disbursement ID</th>
+                  <th>Project Name</th>
+                  <th>Milestone Deliverable</th>
+                  <th>Hours Logged</th>
+                  <th>Payout Amount (₹)</th>
+                  <th>Payment Status</th>
+                  <th>Date Recorded</th>
+                </tr>
+              </thead>
+              <tbody id="fl-payouts-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================== -->
+      <!-- TAB 3: TIMESHEET / WORK HOUR LOGGER                 -->
+      <!-- ==================================================== -->
+      <section id="tab-timesheet" class="content-tab">
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">Specialist Timesheet &amp; Sprint Log</h2>
+            <p class="page-subtitle">Log billable hours against your active projects and document your milestone accomplishments.</p>
+          </div>
+        </div>
+
+        <div class="timesheet-layout-grid">
+          <!-- Left: Log Hours Form -->
+          <div class="table-card" style="padding: 24px;">
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Log Daily / Sprint Work Hours</h3>
+            <form id="form-log-hours" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+              <div class="form-group">
+                <label class="form-label">Select Assigned Project</label>
+                <select id="ts-project-select" class="filter-select" required style="width: 100%; height: 42px;">
+                  <!-- Dynamically filled with freelancer's active projects -->
+                </select>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Date of Work</label>
+                  <input type="date" id="ts-date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Hours Logged</label>
+                  <input type="number" id="ts-hours" class="form-control" placeholder="e.g. 6.5" min="0.5" max="24" step="0.5" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Work Completed / Sprint Task Summary</label>
+                <textarea id="ts-description" class="form-control" rows="3" placeholder="Describe the components built, APIs integrated, or designs rendered..." required></textarea>
+              </div>
+
+              <button type="submit" class="btn-primary-red" style="width: 100%;">
+                <span class="btn-text">Submit Hours to Timesheet</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Right: Logged Entries Table -->
+          <div class="table-card">
+            <div class="card-header-bar" style="padding: 16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-subtle);">
+              <h3 style="font-size: 15px; font-weight: 700;">Recorded Sprint Time Logs</h3>
+              <span class="badge-tag" id="ts-total-hours-badge">0 Hours Logged</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Project</th>
+                    <th>Hours</th>
+                    <th>Sprint Notes / Task Summary</th>
+                  </tr>
+                </thead>
+                <tbody id="timesheet-entries-body">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================== -->
+      <!-- TAB 4: PROFILE & SKILL MANAGEMENT                   -->
+      <!-- ==================================================== -->
+      <section id="tab-profile" class="content-tab">
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">Specialist Profile &amp; Core Skills</h2>
+            <p class="page-subtitle">Manage your verified service skills (Web Development, Graphic Design, Video Editing), contact info, and security credentials.</p>
+          </div>
+        </div>
+
+        <div class="profile-settings-card table-card" style="padding: 28px; max-width: 780px;">
+          <form id="form-fl-profile" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Freelancer ID (Permanent)</label>
+                <input type="text" id="prof-fl-id" class="form-control" readonly style="background: rgba(255,255,255,0.02); opacity: 0.8;">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="prof-fl-name" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Contact Email Address</label>
+                <input type="email" id="prof-fl-email" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone / WhatsApp Number</label>
+                <input type="tel" id="prof-fl-phone" class="form-control" placeholder="+91 98765 43210" required>
+              </div>
+            </div>
+
+            <!-- Core Services Skill Selector -->
+            <div class="form-group">
+              <label class="form-label">Core Specialization Skills (Select from Enterprise Services)</label>
+              <div class="service-checkbox-group">
+                <label class="custom-checkbox">
+                  <input type="checkbox" name="fl-skills" value="Web Development">
+                  <span class="checkmark"></span>
+                  <span class="checkbox-label">Web Development (Full-Stack, React, REST API)</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" name="fl-skills" value="Graphic Design">
+                  <span class="checkmark"></span>
+                  <span class="checkbox-label">Graphic Design (Brand Identity, UI/UX, 3D Assets)</span>
+                </label>
+                <label class="custom-checkbox">
+                  <input type="checkbox" name="fl-skills" value="Video Editing">
+                  <span class="checkmark"></span>
+                  <span class="checkbox-label">Video Editing (Color Grading, Motion Graphics, Reels)</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Update Security Key / Password</label>
+                <input type="text" id="prof-fl-pass" class="form-control" placeholder="Enter new security password">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Talent Availability Status</label>
+                <select id="prof-fl-status" class="filter-select" style="width: 100%; height: 42px;">
+                  <option value="Active">Active (Taking New Projects)</option>
+                  <option value="Available">Available (Standby)</option>
+                  <option value="Temporary">Temporary / On Leave</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top: 20px; display:flex; justify-content:flex-end; gap: 12px;">
+              <button type="submit" class="btn-primary-red" style="padding: 12px 28px;">
+                <span class="btn-text">Save Profile &amp; Sync to Cloud</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION DOCK -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Navigation Dock">
+      <button class="mobile-nav-item active" data-tab="assigned-projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        <span>Projects</span>
+      </button>
+      <button class="mobile-nav-item" data-tab="finances">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+        <span>Payouts</span>
+      </button>
+      <button class="mobile-nav-item" data-tab="timesheet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span>Hours</span>
+      </button>
+      <button class="mobile-nav-item" data-tab="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profile</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 4. MODALS & POPUPS                                      -->
+  <!-- ======================================================== -->
+
+  <!-- Modal 1: Submit Deliverable & Progress Update -->
+  <div id="modal-submit-deliverable" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">SPRINT SUBMISSION</span>
+          <h3 class="modal-title">Submit Deliverables &amp; Progress</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-submit-deliverable">&times;</button>
+      </div>
+      <form id="form-submit-deliverable" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <input type="hidden" id="deliv-project-id">
+        <div class="form-group">
+          <label class="form-label">Project Name</label>
+          <input type="text" id="deliv-project-name" class="form-control" readonly style="background: rgba(255,255,255,0.02); opacity: 0.85;">
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Updated Progress Percentage (%)</label>
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <input type="range" id="deliv-progress-slider" min="0" max="100" class="form-range" style="flex: 1;">
+              <span id="deliv-progress-val" style="font-weight: 700; color: var(--red-ember); width: 45px;">80%</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Project Status</label>
+            <select id="deliv-status-select" class="filter-select" style="width: 100%; height: 42px;">
+              <option value="Active">Active (In Sprint)</option>
+              <option value="In Review">In Review (Ready for Client Audit)</option>
+              <option value="Completed">Completed (Final Delivery)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Deliverable URL / Asset Links (Figma, GitHub, Drive, Reel)</label>
+          <input type="url" id="deliv-asset-url" class="form-control" placeholder="https://github.com/... or https://figma.com/..." required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Sprint Delivery Notes / Milestone Remarks</label>
+          <textarea id="deliv-notes" class="form-control" rows="3" placeholder="Provide notes regarding changes made, QA checks completed, or client approvals..." required></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap: 10px; margin-top: 14px;">
+          <button type="button" class="btn-secondary" data-close-modal="modal-submit-deliverable">Cancel</button>
+          <button type="submit" class="btn-primary-red">Submit Deliverables &amp; Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Request Milestone Disbursement -->
+  <div id="modal-request-payout" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">ESCROW DISBURSEMENT</span>
+          <h3 class="modal-title">Request Milestone Payout (₹)</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-request-payout">&times;</button>
+      </div>
+      <form id="form-request-payout" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <div class="form-group">
+          <label class="form-label">Associated Project</label>
+          <select id="payout-project-select" class="filter-select" required style="width: 100%; height: 42px;">
+            <!-- Dynamically populated -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Milestone Deliverable Name</label>
+          <input type="text" id="payout-milestone-name" class="form-control" placeholder="e.g. Sprint 2 Ingress MTLS &amp; UI Polish" required>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Hours Logged for Milestone</label>
+            <input type="number" id="payout-hours" class="form-control" placeholder="35" min="1" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Requested Disbursement Amount (INR ₹)</label>
+            <input type="number" id="payout-amount" class="form-control" placeholder="45000" min="1000" step="500" required>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap: 10px; margin-top: 14px;">
+          <button type="button" class="btn-secondary" data-close-modal="modal-request-payout">Cancel</button>
+          <button type="submit" class="btn-primary-red">Submit Payout Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Freelancer Portal Script -->
+  <script src="freelancer.js"></script>
+</body>
+</html>

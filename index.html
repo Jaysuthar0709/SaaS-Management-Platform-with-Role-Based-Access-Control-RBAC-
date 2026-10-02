@@ -1,0 +1,2328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexCore | Enterprise SaaS Admin Portal</title>
+  <meta name="description" content="Secure enterprise SaaS management workspace with role-based access control, analytics, and operational monitoring.">
+  
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-red-black">
+
+  <!-- ======================================================== -->
+  <!-- 1. LOGIN PORTAL VIEW                                    -->
+  <!-- ======================================================== -->
+  <section id="login-view" class="view-screen active-view" aria-label="Admin Login Portal">
+    <!-- Ambient Background Lighting -->
+    <div class="login-bg-mesh" aria-hidden="true">
+      <div class="mesh-glow mesh-glow-1"></div>
+      <div class="mesh-glow mesh-glow-2"></div>
+      <div class="mesh-grid"></div>
+    </div>
+
+    <!-- Centered Login Card -->
+    <div class="login-container">
+      <div class="login-card" id="login-card">
+        <!-- Card Top Accents -->
+        <div class="card-accent-line"></div>
+
+        <!-- Logo / Branding Area -->
+        <div class="login-brand">
+          <div class="brand-emblem">
+            <svg class="emblem-svg" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 2L40 10V22C40 33 32 40 22 43C12 40 4 33 4 22V10L22 2Z" fill="url(#brandGrad)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+              <path d="M22 9L33 14.5V22C33 29 28 34.5 22 37C16 34.5 11 29 11 22V14.5L22 9Z" fill="#121216" stroke="rgba(229,9,20,0.4)" stroke-width="1.2"/>
+              <path d="M22 15L28 22H24V29H20V22H16L22 15Z" fill="url(#rubyCoreGrad)"/>
+              <defs>
+                <linearGradient id="brandGrad" x1="4" y1="2" x2="40" y2="43" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#240c10"/>
+                  <stop offset="0.5" stop-color="#141418"/>
+                  <stop offset="1" stop-color="#0c0c0e"/>
+                </linearGradient>
+                <linearGradient id="rubyCoreGrad" x1="16" y1="15" x2="28" y2="29" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#ff3b56"/>
+                  <stop offset="1" stop-color="#e50914"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="emblem-pulse"></span>
+          </div>
+          <h1 class="portal-title">Admin Portal</h1>
+          <p class="portal-subtitle">Secure Management Workspace</p>
+          <div class="rbac-pill">
+            <span class="rbac-dot"></span>
+            <span>ENTERPRISE RBAC &bull; TIER 1 PRIVILEGED</span>
+          </div>
+        </div>
+
+        <!-- Error State Banner (Hidden by default) -->
+        <div id="login-error-banner" class="login-alert hidden" role="alert" aria-live="assertive">
+          <svg class="alert-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          <div class="alert-content">
+            <strong class="alert-title">Authentication Denied</strong>
+            <span class="alert-message">Invalid administrator credentials provided.</span>
+          </div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="login-form" onsubmit="window.executeAdminLogin(event); return false;" autocomplete="off" novalidate>
+          <!-- Email / ID Input Group -->
+          <div class="form-group">
+            <label for="login-email" class="form-label">Administrator ID / Email</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+              </span>
+              <input 
+                type="email" 
+                id="login-email" 
+                class="form-control" 
+                placeholder="name@organization.com" 
+                required 
+                spellcheck="false"
+                autocomplete="username"
+              >
+            </div>
+            <span class="hint-text">Authorized identity handle</span>
+          </div>
+
+          <!-- Password Input Group -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="login-password" class="form-label">Security Key / Password</label>
+              <span class="key-indicator">256-bit AES</span>
+            </div>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                  <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                </svg>
+              </span>
+              <input 
+                type="password" 
+                id="login-password" 
+                class="form-control" 
+                placeholder="••••••••••••" 
+                required 
+                autocomplete="current-password"
+              >
+              <button 
+                type="button" 
+                id="toggle-password-visibility" 
+                class="password-toggle-btn" 
+                aria-label="Toggle password visibility" 
+                title="Show or hide password"
+              >
+                <!-- Eye Open SVG -->
+                <svg class="eye-icon eye-open" viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                </svg>
+                <!-- Eye Off SVG (hidden initially) -->
+                <svg class="eye-icon eye-closed hidden" viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                  <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" />
+                  <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Options Row (Remember me + Protocol status) -->
+          <div class="form-row-options">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="remember-me" checked>
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Keep admin session active</span>
+            </label>
+            <span class="security-status-tag" title="Protected by TLS 1.3">
+              <span class="status-shield-dot"></span>
+              Encrypted
+            </span>
+          </div>
+
+          <!-- Submit Action Button -->
+          <button type="button" id="btn-login-submit" class="btn-primary-red" onclick="if(window.executeAdminLogin){window.executeAdminLogin(event);}">
+            <span class="btn-shine"></span>
+            <span class="btn-text">Secure Login</span>
+            <svg class="btn-arrow" viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </form>
+
+
+        <div style="margin-top: 12px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+          <a href="freelancer.html" style="font-size: 12px; color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+            <span>Looking for Specialist Portal?</span>
+            <span style="color: var(--red-ember); font-weight: 600;">Open Freelancer Portal (freelancer.html) &rarr;</span>
+          </a>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="login-card-footer" style="margin-top: 10px;">
+          <div class="security-badges">
+            <span>SOC2 Type II Certified</span>
+            <span class="footer-sep">&bull;</span>
+            <span>Zero-Trust Architecture</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- 2. FULL-PAGE CINEMATIC LOADING ANIMATION                -->
+  <!-- ======================================================== -->
+  <div id="cinematic-loader" class="cinematic-overlay hidden" aria-hidden="true" role="dialog">
+    <!-- Dynamic Canvas for Ambient Red Particles & Light Flow -->
+    <canvas id="loader-canvas" class="loader-canvas"></canvas>
+
+    <!-- Central Cinematic Pod -->
+    <div class="cinematic-pod">
+      <!-- Outer Pulsing Glow Rings -->
+      <div class="portal-ring ring-outer"></div>
+      <div class="portal-ring ring-mid"></div>
+      <div class="portal-ring ring-inner"></div>
+
+      <!-- Center Holographic Emblem -->
+      <div class="cinematic-emblem-wrap">
+        <div class="emblem-core">
+          <svg class="cinematic-logo-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="32,4 58,18 58,46 32,60 6,46 6,18" stroke="url(#cinematicHexGrad)" stroke-width="2" fill="#09090c"/>
+            <polygon points="32,12 50,22 50,42 32,52 14,42 14,22" stroke="rgba(229, 9, 20, 0.4)" stroke-width="1.5" fill="#131318"/>
+            <!-- Glowing Core -->
+            <path d="M32 20L42 32H35V44H29V32H22L32 20Z" fill="url(#coreFlameGrad)"/>
+            <defs>
+              <linearGradient id="cinematicHexGrad" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#ff2a4b"/>
+                <stop offset="0.5" stop-color="#8b0000"/>
+                <stop offset="1" stop-color="#e50914"/>
+              </linearGradient>
+              <linearGradient id="coreFlameGrad" x1="22" y1="20" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#ffffff"/>
+                <stop offset="0.3" stop-color="#ff3b56"/>
+                <stop offset="1" stop-color="#e50914"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="core-radial-flare"></div>
+        </div>
+
+        <!-- Futuristic Circular SVG Progress Ring -->
+        <svg class="progress-ring-svg" width="160" height="160">
+          <circle class="progress-ring-bg" cx="80" cy="80" r="72" />
+          <circle id="progress-ring-circle" class="progress-ring-stroke" cx="80" cy="80" r="72" />
+        </svg>
+      </div>
+
+      <!-- Percentage & Status Stream -->
+      <div class="loader-metrics">
+        <div class="percentage-display">
+          <span id="loader-percentage">0</span><span class="pct-symbol">%</span>
+        </div>
+        
+        <div class="status-stage-wrapper">
+          <div class="radar-scan-line"></div>
+          <p id="loader-status-text" class="loader-status-text">Authenticating Admin...</p>
+        </div>
+
+        <!-- System Node Breadcrumb -->
+        <div class="loader-stages-indicator">
+          <span class="stage-pip active" data-stage="1"></span>
+          <span class="stage-pip" data-stage="2"></span>
+          <span class="stage-pip" data-stage="3"></span>
+          <span class="stage-pip" data-stage="4"></span>
+          <span class="stage-pip" data-stage="5"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 3. ADMIN MANAGEMENT DASHBOARD VIEW                      -->
+  <!-- ======================================================== -->
+  <div id="dashboard-view" class="dashboard-shell hidden">
+
+    <!-- LEFT COLLAPSIBLE SIDEBAR -->
+    <aside id="sidebar" class="admin-sidebar" aria-label="Main Navigation">
+      <!-- Sidebar Header & Brand -->
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="brand-mini-emblem">
+            <svg viewBox="0 0 28 28" fill="none" width="24" height="24">
+              <path d="M14 2L26 7.5V14C26 21 21 25.5 14 27C7 25.5 2 21 2 14V7.5L14 2Z" fill="#18181f" stroke="#e50914" stroke-width="1.6"/>
+              <path d="M14 8L18 14H15V19H13V14H10L14 8Z" fill="#ff2a4b"/>
+            </svg>
+          </div>
+          <div class="brand-names">
+            <span class="brand-title">ApexCore</span>
+            <span class="brand-tag">SaaS RBAC</span>
+          </div>
+        </div>
+        <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" aria-label="Toggle sidebar collapse" title="Fold / Unfold Sidebar">
+          <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <!-- Mobile close button -->
+        <button id="sidebar-mobile-close-btn" class="sidebar-mobile-close-btn" aria-label="Close navigation sidebar" title="Fold Sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigation Menu (Primary 5 Sections ONLY) -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">MAIN WORKSPACE</div>
+        <ul class="nav-list" role="menubar">
+          
+          <!-- 1. Dashboard -->
+          <li class="nav-item">
+            <button class="nav-link active" data-tab="dashboard" data-tooltip="Dashboard" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                  <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                  <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                  <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                </svg>
+              </span>
+              <span class="nav-label">Dashboard</span>
+              <span class="nav-active-pill"></span>
+            </button>
+          </li>
+
+          <!-- 2. Clients -->
+          <li class="nav-item">
+            <button class="nav-link" data-tab="clients" data-tooltip="Clients" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </span>
+              <span class="nav-label">Clients</span>
+              <span class="nav-counter" id="badge-total-clients">0</span>
+            </button>
+          </li>
+
+          <!-- 3. Projects -->
+          <li class="nav-item">
+            <button class="nav-link" data-tab="project" data-tooltip="Projects" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </span>
+              <span class="nav-label">Projects</span>
+              <span class="nav-counter" id="badge-total-projects">0</span>
+            </button>
+          </li>
+
+          <!-- 4. Freelancers -->
+          <li class="nav-item">
+            <button class="nav-link" data-tab="freelancers" data-tooltip="Freelancers" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+              </span>
+              <span class="nav-label">Freelancers</span>
+              <span class="nav-counter" id="badge-total-freelancers">0</span>
+            </button>
+          </li>
+
+          <!-- 5. Payments -->
+          <li class="nav-item">
+            <button class="nav-link" data-tab="payments" data-tooltip="Payments" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+              </span>
+              <span class="nav-label">Payments</span>
+              <span class="nav-counter" id="badge-pending-payments">0</span>
+            </button>
+          </li>
+
+          <!-- 6. Freelancer Portal -->
+          <li class="nav-item">
+            <button class="nav-link" data-tab="freelancer-portal" data-tooltip="Freelancer Portal" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                  <polyline points="10 17 15 12 10 7"></polyline>
+                  <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+              </span>
+              <span class="nav-label">Freelancer Portal</span>
+              <span class="nav-counter" id="badge-portal-freelancers">0</span>
+            </button>
+          </li>
+
+          <!-- 7. Admin Portal -->
+          <li class="nav-item">
+            <button class="nav-link" data-tab="admin-portal" data-tooltip="Admin Portal" role="menuitem">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </span>
+              <span class="nav-label">Admin Portal</span>
+              <span class="nav-counter" id="badge-total-admins">1</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Sidebar Footer / Session Health -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-card">
+          <div class="user-avatar-wrap">
+            <div class="avatar-ring"></div>
+            <div class="user-avatar">J</div>
+          </div>
+          <div class="user-details">
+            <span class="user-name">Jay</span>
+            <span class="user-role">Super Administrator</span>
+          </div>
+          <button id="btn-sidebar-logout" class="quick-logout-btn" title="Sign Out" aria-label="Sign Out">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- SIDEBAR BACKDROP FOR MOBILE & TABLET DRAWER -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+    <!-- MAIN DASHBOARD CONTENT AREA -->
+    <main class="dashboard-main">
+
+      <!-- MODERN TOP NAVIGATION BAR -->
+      <header class="dashboard-topbar">
+        <div class="topbar-left">
+          <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Open mobile navigation menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <!-- Current View Title & Breadcrumb -->
+          <div class="view-breadcrumb">
+            <span class="breadcrumb-root">Apex Workspace</span>
+            <span class="breadcrumb-sep">/</span>
+            <span id="current-view-title" class="breadcrumb-current">Dashboard</span>
+          </div>
+        </div>
+
+        <!-- Center Search Omnibar -->
+        <div class="topbar-search">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input type="text" id="global-search-input" placeholder="Search projects, freelancers, client invoices... (Ctrl + K)" autocomplete="off">
+            <kbd class="search-shortcut">⌘K</kbd>
+          </div>
+        </div>
+
+        <!-- Right System Indicators & Profile Area -->
+        <div class="topbar-right">
+          <!-- Live Date & Clock Pill -->
+          <div class="time-badge" id="system-time-display">
+            <span class="clock-icon">&#9679;</span>
+            <span id="live-time">13:17:00</span>
+            <span class="badge-timezone">UTC+5:30</span>
+          </div>
+
+          <!-- Freelancer Portal Switcher Link -->
+          <a href="freelancer.html" target="_blank" class="topbar-icon-btn" title="Open Dedicated Freelancer Portal in new tab" style="display:inline-flex; align-items:center; gap:5px; text-decoration:none; padding: 0 10px; width:auto; border-radius: 20px; font-size:11px; font-weight:600; border:1px solid rgba(255,255,255,0.12); color: var(--text-secondary); background: rgba(255,255,255,0.03);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            <span>Freelancer Portal</span>
+          </a>
+
+          <!-- Notification Bell -->
+          <div class="notification-wrap">
+            <button id="btn-notifications" class="topbar-icon-btn" aria-label="View notifications">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+              <span class="notification-indicator"></span>
+            </button>
+          </div>
+
+          <!-- Admin Profile Pill & Logout -->
+          <div class="topbar-user-pill">
+            <div class="topbar-avatar">
+              <span>J</span>
+              <span class="avatar-online-dot"></span>
+            </div>
+            <div class="topbar-user-meta">
+              <span class="topbar-name">Jay</span>
+              <span class="topbar-badge">Admin</span>
+            </div>
+            <button id="btn-topbar-logout" class="topbar-logout-btn" title="Sign Out of Portal" aria-label="Sign out">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+              </svg>
+              <span class="logout-text">Logout</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- TAB 1: DASHBOARD MAIN OVERVIEW -->
+      <section id="tab-dashboard" class="content-tab active-tab">
+        <!-- Overview Banner -->
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">Executive Operations Overview</h2>
+            <p class="page-subtitle">Real-time metrics, project velocity, and multi-tier financial cashflow.</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn-secondary" id="btn-export-report">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+              Export Report
+            </button>
+            <button class="btn-primary-red-sm" id="btn-quick-new-project">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              New Project
+            </button>
+          </div>
+        </div>
+
+        <!-- 8 KPI METRICS GRID -->
+        <div class="kpi-grid">
+          <!-- 1. Total Projects -->
+          <div class="kpi-card cursor-nav" data-navigate="project" title="Click to view Project Portfolio">
+            <div class="kpi-top">
+              <span class="kpi-title">Total Projects</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value count-up" id="kpi-val-total-projects" data-target="0">0</span>
+              <span class="kpi-delta positive">Live Portfolio</span>
+            </div>
+            <div class="kpi-footer-bar">
+              <div class="kpi-progress" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- 2. Active Projects -->
+          <div class="kpi-card accent-glow cursor-nav" data-navigate="project" title="Click to view Active Projects">
+            <div class="kpi-top">
+              <span class="kpi-title">Active Projects</span>
+              <div class="kpi-icon-wrap red-glow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value count-up" id="kpi-val-active-projects" data-target="0">0</span>
+              <span class="kpi-subtag">In Sprint</span>
+            </div>
+            <div class="kpi-footer-bar">
+              <div class="kpi-progress red-bar" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- 3. Completed Projects -->
+          <div class="kpi-card cursor-nav" data-navigate="project" title="Click to view Completed Projects">
+            <div class="kpi-top">
+              <span class="kpi-title">Completed Projects</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value count-up" id="kpi-val-completed-projects" data-target="0">0</span>
+              <span class="kpi-delta positive">Delivered</span>
+            </div>
+            <div class="kpi-footer-bar">
+              <div class="kpi-progress" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- 4. Freelancers -->
+          <div class="kpi-card cursor-nav" data-navigate="freelancers" title="Click to view Specialist Freelancers">
+            <div class="kpi-top">
+              <span class="kpi-title">Freelancers</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value count-up" id="kpi-val-freelancers" data-target="0">0</span>
+              <span class="kpi-subtag">Specialists</span>
+            </div>
+            <div class="kpi-footer-bar">
+              <div class="kpi-progress" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- 5. Clients -->
+          <div class="kpi-card cursor-nav" data-navigate="clients" title="Click to view Enterprise Clients">
+            <div class="kpi-top">
+              <span class="kpi-title">Enterprise Clients</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="kpi-value count-up" id="kpi-val-clients" data-target="0">0</span>
+              <span class="kpi-delta positive">Verified Accounts</span>
+            </div>
+            <div class="kpi-footer-bar">
+              <div class="kpi-progress" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- 6. Total Revenue -->
+          <div class="kpi-card highlight-revenue cursor-nav" data-navigate="payments" title="Click to view Payments & Financials">
+            <div class="kpi-top">
+              <span class="kpi-title">Total Revenue</span>
+              <div class="kpi-icon-wrap red-glow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="currency-sign">₹</span>
+              <span class="kpi-value count-up" id="kpi-val-total-revenue" data-target="0" data-format="currency">0</span>
+              <span class="kpi-delta positive">Revenue Total</span>
+            </div>
+            <div class="kpi-footer-bar">
+              <div class="kpi-progress red-bar" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- 7. Client Pending Payments -->
+          <div class="kpi-card cursor-nav" data-navigate="payments" title="Click to view Pending Invoices">
+            <div class="kpi-top">
+              <span class="kpi-title">Client Pending Payments</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="currency-sign">₹</span>
+              <span class="kpi-value count-up" id="kpi-val-client-pending" data-target="0" data-format="currency">0</span>
+              <span class="kpi-subtag warning-tag">Invoices Due</span>
+            </div>
+            <div class="kpi-footer-bar">
+              <div class="kpi-progress" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- 8. Freelancer Pending Payments -->
+          <div class="kpi-card cursor-nav" data-navigate="payments" title="Click to view Freelancer Disbursements">
+            <div class="kpi-top">
+              <span class="kpi-title">Freelancer Pending Payments</span>
+              <div class="kpi-icon-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <line x1="6" y1="12" x2="10" y2="12"></line>
+                </svg>
+              </div>
+            </div>
+            <div class="kpi-value-row">
+              <span class="currency-sign">₹</span>
+              <span class="kpi-value count-up" id="kpi-val-freelancer-pending" data-target="0" data-format="currency">0</span>
+              <span class="kpi-subtag">Disbursements Due</span>
+            </div>
+            <div class="kpi-footer-bar">
+              <div class="kpi-progress" style="width: 100%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW: PROJECT PROGRESS & FINANCIAL CASHFLOW -->
+        <div class="charts-grid">
+          <!-- Cashflow & Revenue Overview Chart -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div>
+                <h3 class="card-heading">Financial Cashflow &amp; Payouts</h3>
+                <p class="card-subheading">Gross Client Invoiced vs Freelancer Disbursements (Trailing 6 Months)</p>
+              </div>
+              <div class="chart-legend-custom">
+                <span class="legend-item"><span class="legend-dot dot-red"></span>Client Revenue</span>
+                <span class="legend-item"><span class="legend-dot dot-muted"></span>Freelancer Payout</span>
+              </div>
+            </div>
+            <div class="chart-container">
+              <canvas id="cashflowChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Project Velocity & Status Distribution Chart -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div>
+                <h3 class="card-heading">Project Status Distribution</h3>
+                <p class="card-subheading">Current lifecycle allocation across active portfolios</p>
+              </div>
+            </div>
+            <div class="chart-container doughnut-wrap">
+              <canvas id="projectDistributionChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- RECENT ACTIVITY DUAL COLUMN: RECENT PROJECTS & RECENT PAYMENTS -->
+        <div class="dashboard-activity-grid">
+          
+          <!-- Recent Projects -->
+          <div class="table-card">
+            <div class="table-card-header">
+              <div class="header-title-group">
+                <h3 class="card-heading">Recent Strategic Projects</h3>
+                <span class="badge-count" id="dash-recent-proj-count">5 Items</span>
+              </div>
+              <button class="link-action-btn" data-navigate="project">View All &rarr;</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Project Name</th>
+                    <th>Client</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th>Budget</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-recent-projects-tbody">
+                  <!-- Populated via script.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Payments Stream -->
+          <div class="table-card">
+            <div class="table-card-header">
+              <div class="header-title-group">
+                <h3 class="card-heading">Recent Payments &amp; Escrow Activity</h3>
+                <span class="badge-count">Live Stream</span>
+              </div>
+              <button class="link-action-btn" data-navigate="payments">Billing Hub &rarr;</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Transaction Ref</th>
+                    <th>Entity / Counterparty</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-recent-payments-tbody">
+                  <!-- Populated via script.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- OVERALL MANAGEMENT STATS WIDGETS -->
+        <div class="management-stats-row">
+          <div class="stat-mini-card">
+            <div class="stat-icon-ruby">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-num">96.8%</span>
+              <span class="stat-label">SLA Compliance Velocity</span>
+            </div>
+          </div>
+
+          <div class="stat-mini-card">
+            <div class="stat-icon-ruby">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-num">14 Days</span>
+              <span class="stat-label">Avg Sprint Turnaround</span>
+            </div>
+          </div>
+
+          <div class="stat-mini-card">
+            <div class="stat-icon-ruby">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-num">100%</span>
+              <span class="stat-label">Escrow Reconciliation</span>
+            </div>
+          </div>
+
+          <div class="stat-mini-card">
+            <div class="stat-icon-ruby">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-num">Tier 1</span>
+              <span class="stat-label">Security Audit Score</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: CLIENTS DIRECTORY -->
+      <section id="tab-clients" class="content-tab">
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">Enterprise Client Directory</h2>
+            <p class="page-subtitle">Track corporate accounts, enterprise agreements, key stakeholders, and revenue health.</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn-primary-red-sm" id="btn-open-client-modal">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Add Enterprise Client
+            </button>
+          </div>
+        </div>
+
+        <!-- Summary Metric Strips -->
+        <div class="subpage-metric-strip">
+          <div class="sub-metric">
+            <span class="sub-label">Corporate Client Accounts</span>
+            <span class="sub-value font-mono">22 Active</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Client Retention Rate</span>
+            <span class="sub-value font-mono text-green">100.0%</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Gross Billed to Clients</span>
+            <span class="sub-value font-mono text-green">₹14,86,500</span>
+          </div>
+          <div class="sub-metric highlight-warning">
+            <span class="sub-label">Total Payment Due</span>
+            <span class="sub-value font-mono text-crimson">₹1,85,000</span>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="table-toolbar">
+          <div class="toolbar-search">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input type="text" id="client-filter-input" placeholder="Search clients by name, ID, email, or contact number...">
+          </div>
+          <div class="toolbar-filters">
+            <select id="client-service-filter" class="filter-select">
+              <option value="all">All Services</option>
+              <option value="Web Development">Web Development</option>
+              <option value="Graphic Design">Graphic Design</option>
+              <option value="Video Editing">Video Editing</option>
+            </select>
+            <select id="client-status-filter" class="filter-select">
+              <option value="all">All Client Statuses</option>
+              <option value="Active">Active</option>
+              <option value="Onboarding">Onboarding</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Clients Full Table -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Client ID</th>
+                  <th>Client Name</th>
+                  <th>Contact Email</th>
+                  <th>Contact Number</th>
+                  <th>Services (Core 3)</th>
+                  <th>Active Projects</th>
+                  <th>Payment Due (₹)</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="clients-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: PROJECT MANAGEMENT -->
+      <section id="tab-project" class="content-tab">
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">Enterprise Project Portfolio</h2>
+            <p class="page-subtitle">Track deliverables, budgets, client milestones, and assigned engineering squads.</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn-primary-red-sm" id="btn-open-project-modal">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Create New Project
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="table-toolbar">
+          <div class="toolbar-search">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input type="text" id="project-filter-input" placeholder="Search projects by title, ID, client, notes, or freelancer...">
+          </div>
+          <div class="toolbar-filters">
+            <select id="project-service-filter" class="filter-select">
+              <option value="all">All Services</option>
+              <option value="Web Development">Web Development</option>
+              <option value="Graphic Design">Graphic Design</option>
+              <option value="Video Editing">Video Editing</option>
+            </select>
+            <select id="project-status-filter" class="filter-select">
+              <option value="all">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="In Review">In Review</option>
+              <option value="Completed">Completed</option>
+              <option value="Planning">Planning</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Projects Full Table -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Project ID</th>
+                  <th>Project Name (Service)</th>
+                  <th>Client</th>
+                  <th>Budget (₹)</th>
+                  <th>Progress</th>
+                  <th>Status</th>
+                  <th>Project Notes</th>
+                  <th>Assigned Freelancer</th>
+                  <th>Deadline</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="projects-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: FREELANCERS DIRECTORY -->
+      <section id="tab-freelancers" class="content-tab">
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">Specialist Freelancers &amp; Engineers</h2>
+            <p class="page-subtitle">Vetted talent pool, availability, hourly agreements, and technical competencies.</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn-primary-red-sm" id="btn-open-freelancer-modal">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Add Specialist
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="table-toolbar">
+          <div class="toolbar-search">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input type="text" id="freelancer-filter-input" placeholder="Search freelancers by name, ID, email, or contact number...">
+          </div>
+          <div class="toolbar-filters">
+            <select id="freelancer-skill-filter" class="filter-select">
+              <option value="all">All Skills (Core 3)</option>
+              <option value="Web Development">Web Development</option>
+              <option value="Graphic Design">Graphic Design</option>
+              <option value="Video Editing">Video Editing</option>
+            </select>
+            <select id="freelancer-payment-filter" class="filter-select">
+              <option value="all">All Payment Statuses</option>
+              <option value="Cleared">Payment Cleared</option>
+              <option value="Due">Payment Due</option>
+              <option value="Partially Paid">Partially Paid</option>
+            </select>
+            <select id="freelancer-status-filter" class="filter-select">
+              <option value="all">All Availability</option>
+              <option value="Active">Active on Project</option>
+              <option value="Available">Available</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Freelancers Table -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Freelancer ID</th>
+                  <th>Freelancer Name</th>
+                  <th>Contact Email</th>
+                  <th>Contact Number</th>
+                  <th>Skills (Core 3)</th>
+                  <th>Payment Information</th>
+                  <th>Assigned Projects</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="freelancers-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: PAYMENTS & FINANCIAL LEDGER -->
+      <section id="tab-payments" class="content-tab">
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">Payments &amp; Financial Operations</h2>
+            <p class="page-subtitle">Unified treasury and billing center for enterprise client receivables and specialist disbursements.</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn-secondary" id="btn-open-freelancer-payout-modal">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+              </svg>
+              Release Disbursement
+            </button>
+            <button class="btn-primary-red-sm" id="btn-open-client-payment-modal">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Record Client Invoice
+            </button>
+          </div>
+        </div>
+
+        <!-- Summary Metric Strips -->
+        <div class="subpage-metric-strip">
+          <div class="sub-metric">
+            <span class="sub-label">Gross Billed to Clients</span>
+            <span class="sub-value font-mono">₹14,86,500</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Cleared &amp; Settled</span>
+            <span class="sub-value font-mono text-green">₹12,48,500</span>
+          </div>
+          <div class="sub-metric highlight-warning">
+            <span class="sub-label">Client Pending Invoices</span>
+            <span class="sub-value font-mono text-crimson">₹1,85,000</span>
+          </div>
+          <div class="sub-metric highlight-warning">
+            <span class="sub-label">Freelancer Pending Disbursements</span>
+            <span class="sub-value font-mono text-crimson">₹64,500</span>
+          </div>
+        </div>
+
+        <!-- Segmented Subtab Switcher & Filter Toolbar -->
+        <div class="payment-subtab-container">
+          <div class="payment-subtab-group">
+            <button class="payment-subtab-btn active" id="subtab-btn-client-invoices" data-subtab="client-invoices">
+              Client Invoices (Receivables)
+            </button>
+            <button class="payment-subtab-btn" id="subtab-btn-freelancer-payouts" data-subtab="freelancer-payouts">
+              Freelancer Disbursements (Payouts)
+            </button>
+          </div>
+          <div class="toolbar-search payment-search-box">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input type="text" id="payments-filter-input" placeholder="Search invoices or disbursements...">
+          </div>
+        </div>
+
+        <!-- Panel 1: Client Invoices Table -->
+        <div id="subtab-panel-client-invoices" class="table-card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Invoice #</th>
+                  <th>Client Organization</th>
+                  <th>Project Associated</th>
+                  <th>Issue Date</th>
+                  <th>Due Date</th>
+                  <th>Invoice Total</th>
+                  <th>Payment Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="client-payments-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Panel 2: Freelancer Disbursements Table -->
+        <div id="subtab-panel-freelancer-payouts" class="table-card hidden">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Disbursement ID</th>
+                  <th>Freelancer</th>
+                  <th>Assigned Project</th>
+                  <th>Milestone Deliverable</th>
+                  <th>Hours Logged</th>
+                  <th>Payout Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="freelancer-payouts-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: FREELANCER PORTAL & ACCESS MANAGEMENT -->
+      <section id="tab-freelancer-portal" class="content-tab">
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">Freelancer Portal &amp; Access Management</h2>
+            <p class="page-subtitle">Admin center to issue login IDs, generate secure passwords, track assigned projects, and monitor deliverables.</p>
+          </div>
+          <div class="page-header-actions">
+            <a href="freelancer.html" target="_blank" class="btn-secondary" id="btn-open-freelancer-standalone" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none;">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+              </svg>
+              Open Dedicated Portal (freelancer.html) ↗
+            </a>
+            <button class="btn-primary-red-sm" id="btn-open-provision-freelancer-modal">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Issue Portal Login ID &amp; Key
+            </button>
+          </div>
+        </div>
+
+        <!-- Summary Metric Strips -->
+        <div class="subpage-metric-strip">
+          <div class="sub-metric">
+            <span class="sub-label">Issued Portal Accounts</span>
+            <span class="sub-value font-mono" id="portal-stat-issued-accounts">3 Accounts</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Active Specialists</span>
+            <span class="sub-value font-mono text-green" id="portal-stat-active-sessions">3 Active</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Assigned Work Sprints</span>
+            <span class="sub-value font-mono text-green" id="portal-stat-assigned-sprints">3 Active</span>
+          </div>
+          <div class="sub-metric highlight-warning">
+            <span class="sub-label">Active Sprint Audits</span>
+            <span class="sub-value font-mono text-crimson" id="portal-stat-pending-audits">1 In Progress</span>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="table-toolbar">
+          <div class="toolbar-search">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input type="text" id="freelancer-portal-search" placeholder="Search by freelancer name, login ID, or assigned project...">
+          </div>
+          <div class="toolbar-filters">
+            <select id="freelancer-portal-status-filter" class="filter-select">
+              <option value="all">All Credential Statuses</option>
+              <option value="Active">Active Credentials</option>
+              <option value="Temporary">Awaiting Password Reset</option>
+              <option value="Suspended">Access Suspended</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Freelancer Portal Accounts Table -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Specialist Freelancer</th>
+                  <th>Portal Login Email / ID</th>
+                  <th>Issued Security Key / Pass</th>
+                  <th>Assigned Work &amp; Project</th>
+                  <th>Hours &amp; Deliverables</th>
+                  <th>Portal Status</th>
+                  <th>Last Portal Access</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="freelancer-portal-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 7: ADMIN PORTAL & RBAC USER MANAGEMENT -->
+      <section id="tab-admin-portal" class="content-tab">
+        <div class="page-header-row">
+          <div>
+            <h2 class="page-title">Admin Portal &amp; Privilege Management</h2>
+            <p class="page-subtitle">Super Admin control center to generate administrative user IDs, issue passwords, and enforce RBAC policies.</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn-primary-red-sm" id="btn-open-new-admin-modal">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Create New Admin User
+            </button>
+          </div>
+        </div>
+
+        <!-- Summary Metric Strips -->
+        <div class="subpage-metric-strip">
+          <div class="sub-metric">
+            <span class="sub-label">Authorized Admin Users</span>
+            <span class="sub-value font-mono" id="admin-stat-total-accounts">2 Accounts</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Root Super Administrator</span>
+            <span class="sub-value font-mono text-crimson" id="admin-stat-super-admin">1 (Jay - Owner)</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Operational &amp; Financial Admins</span>
+            <span class="sub-value font-mono text-green" id="admin-stat-active-admins">1 Active</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">RBAC Security Policy</span>
+            <span class="sub-value font-mono text-green">Strict 256-bit AES</span>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="table-toolbar">
+          <div class="toolbar-search">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+            <input type="text" id="admin-portal-search" placeholder="Search admin accounts by name, user ID, or role...">
+          </div>
+          <div class="toolbar-filters">
+            <select id="admin-role-filter" class="filter-select">
+              <option value="all">All Admin Roles</option>
+              <option value="Super Admin">Super Admin</option>
+              <option value="Operations Admin">Operations Admin</option>
+              <option value="Financial Admin">Financial Admin</option>
+              <option value="Security Auditor">Security Auditor</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Admin Accounts Table -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Administrator Profile</th>
+                  <th>Admin User ID / Email</th>
+                  <th>Security Key / Pass</th>
+                  <th>Assigned Role</th>
+                  <th>Privileges Matrix</th>
+                  <th>Account Status</th>
+                  <th>Last Authentication</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION DOCK -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Navigation Dock">
+      <button class="mobile-nav-item active" data-tab="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Overview</span>
+      </button>
+      <button class="mobile-nav-item" data-tab="clients">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Clients</span>
+      </button>
+      <button class="mobile-nav-item" data-tab="project">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        <span>Projects</span>
+      </button>
+      <button class="mobile-nav-item" data-tab="freelancers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Talent</span>
+      </button>
+      <button class="mobile-nav-item" id="mobile-more-menu-btn" title="More Portals">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+        <span>More</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 4. MODALS & POPUPS                                      -->
+  <!-- ======================================================== -->
+
+  <!-- Modal: New Client -->
+  <div id="modal-new-client" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">CLIENT ACQUISITION</span>
+          <h3 class="modal-title">Onboard Enterprise Client</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-new-client">&times;</button>
+      </div>
+      <form id="form-new-client" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Client / Organization Name</label>
+            <input type="text" id="new-client-name" class="form-control" placeholder="e.g. Nexus Global Tech" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Email</label>
+            <input type="email" id="new-client-email" class="form-control" placeholder="e.g. contact@nexusglobal.com" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Contact Number (Phone)</label>
+            <input type="tel" id="new-client-phone" class="form-control" placeholder="+91 98201 45678" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Initial Payment Due (₹)</label>
+            <input type="number" id="new-client-due" class="form-control" placeholder="45000" min="0" value="0" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subscribed Services (Select Core Services)</label>
+          <div class="service-checkbox-group">
+            <label class="custom-checkbox">
+              <input type="checkbox" name="new-client-service" value="Web Development" checked>
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Web Development</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" name="new-client-service" value="Graphic Design">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Graphic Design</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" name="new-client-service" value="Video Editing">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Video Editing</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Active Projects Count</label>
+            <input type="number" id="new-client-projects" class="form-control" placeholder="1" min="0" max="20" value="1" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account Status</label>
+            <select id="new-client-status" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Onboarding">Onboarding</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-new-client">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Create Client Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Client Account -->
+  <div id="modal-edit-client" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">ACCOUNT CONFIGURATION</span>
+          <h3 class="modal-title">Edit Client Information</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-edit-client">&times;</button>
+      </div>
+      <form id="form-edit-client" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <input type="hidden" id="edit-client-id">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Client Name</label>
+            <input type="text" id="edit-client-name" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Email</label>
+            <input type="email" id="edit-client-email" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Contact Number (Phone)</label>
+            <input type="tel" id="edit-client-phone" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Due (₹ INR)</label>
+            <input type="number" id="edit-client-due" class="form-control" min="0" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subscribed Services</label>
+          <div class="service-checkbox-group">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="edit-client-svc-web" value="Web Development">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Web Development</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="edit-client-svc-graphic" value="Graphic Design">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Graphic Design</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="edit-client-svc-video" value="Video Editing">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Video Editing</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Active Projects</label>
+            <input type="number" id="edit-client-projects" class="form-control" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account Status</label>
+            <select id="edit-client-status" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Onboarding">Onboarding</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-edit-client">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Save Client Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: New Project -->
+  <div id="modal-new-project" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">PROJECT CREATION</span>
+          <h3 class="modal-title">Create New Project</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-new-project">&times;</button>
+      </div>
+      <form id="form-new-project" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Project Name</label>
+            <input type="text" id="new-proj-title" class="form-control" placeholder="e.g. NextGen Cloud Platform" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Service Type (Core 3)</label>
+            <select id="new-proj-service" class="form-control" required>
+              <option value="Web Development">Web Development</option>
+              <option value="Graphic Design">Graphic Design</option>
+              <option value="Video Editing">Video Editing</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Client Name</label>
+            <input type="text" id="new-proj-client" class="form-control" placeholder="e.g. Nexus Global Tech" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Total Budget (₹ INR)</label>
+            <input type="number" id="new-proj-budget" class="form-control" placeholder="150000" min="1000" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Assign Freelancer</label>
+            <select id="new-proj-freelancer" class="form-control">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Delivery Deadline</label>
+            <input type="date" id="new-proj-deadline" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Initial Progress (%)</label>
+            <input type="number" id="new-proj-progress" class="form-control" min="0" max="100" value="15" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Project Status</label>
+            <select id="new-proj-status" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Planning">Planning</option>
+              <option value="In Review">In Review</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Project Notes &amp; Added Information</label>
+          <textarea id="new-proj-notes" class="form-control" style="height: 65px; padding: 10px;" placeholder="Add milestone deliverables, repository links, or client instructions..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-new-project">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Initialize Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Project -->
+  <div id="modal-edit-project" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">PROJECT MODIFICATIONS</span>
+          <h3 class="modal-title">Make Changes to Project</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-edit-project">&times;</button>
+      </div>
+      <form id="form-edit-project" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <input type="hidden" id="edit-proj-id">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Project Name</label>
+            <input type="text" id="edit-proj-title" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Service Type</label>
+            <select id="edit-proj-service" class="form-control" required>
+              <option value="Web Development">Web Development</option>
+              <option value="Graphic Design">Graphic Design</option>
+              <option value="Video Editing">Video Editing</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Client Name</label>
+            <input type="text" id="edit-proj-client" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Budget (₹ INR)</label>
+            <input type="number" id="edit-proj-budget" class="form-control" min="1000" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Assigned Freelancer</label>
+            <select id="edit-proj-freelancer" class="form-control">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deadline</label>
+            <input type="date" id="edit-proj-deadline" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Progress (%)</label>
+            <input type="number" id="edit-proj-progress" class="form-control" min="0" max="100" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Project Status</label>
+            <select id="edit-proj-status" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Planning">Planning</option>
+              <option value="In Review">In Review</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Project Notes &amp; Scope Details</label>
+          <textarea id="edit-proj-notes" class="form-control" style="height: 65px; padding: 10px;"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-edit-project">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Save Project Updates</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Freelancer -->
+  <div id="modal-new-freelancer" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">TALENT ONBOARDING</span>
+          <h3 class="modal-title">Onboard Specialized Talent</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-new-freelancer">&times;</button>
+      </div>
+      <form id="form-new-freelancer" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Freelancer Full Name</label>
+            <input type="text" id="new-free-name" class="form-control" placeholder="e.g. Aarav Sharma" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Freelancer Email</label>
+            <input type="email" id="new-free-email" class="form-control" placeholder="aarav.sharma@freelance.apex.com" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Freelancer Number (Phone)</label>
+            <input type="tel" id="new-free-phone" class="form-control" placeholder="+91 98765 43210" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Portal Access Password (Admin Defined)</label>
+            <input type="text" id="new-free-password" class="form-control font-mono" placeholder="e.g. SharmaSec#2026">
+            <span class="hint-text">Set password now or issue via Portal Tab later</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Specialist Skills (Core Services)</label>
+          <div class="service-checkbox-group">
+            <label class="custom-checkbox">
+              <input type="checkbox" name="new-free-skill" value="Web Development" checked>
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Web Dev</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" name="new-free-skill" value="Graphic Design">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Design</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" name="new-free-skill" value="Video Editing">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Video</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Payment Information Status</label>
+            <select id="new-free-pay-status" class="form-control">
+              <option value="Cleared">Cleared</option>
+              <option value="Due">Due</option>
+              <option value="Partially Paid">Partially Paid</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Due Amount (₹)</label>
+            <input type="number" id="new-free-pay-due" class="form-control" placeholder="25000" min="0" value="0" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Payment Cleared Amount (₹)</label>
+            <input type="number" id="new-free-pay-cleared" class="form-control" placeholder="60000" min="0" value="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Availability Status</label>
+            <select id="new-free-status" class="form-control">
+              <option value="Active">Active on Project</option>
+              <option value="Available">Available</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-new-freelancer">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Onboard Freelancer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Freelancer Account -->
+  <div id="modal-edit-freelancer" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">TALENT ACCOUNT</span>
+          <h3 class="modal-title">Edit Freelancer Information</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-edit-freelancer">&times;</button>
+      </div>
+      <form id="form-edit-freelancer" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <input type="hidden" id="edit-free-id">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Freelancer Name</label>
+            <input type="text" id="edit-free-name" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Freelancer Email</label>
+            <input type="email" id="edit-free-email" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Contact Number</label>
+            <input type="tel" id="edit-free-phone" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Portal Access Password</label>
+            <input type="text" id="edit-free-password" class="form-control font-mono" placeholder="Set new security pass">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Specialist Skills (Core Services)</label>
+          <div class="service-checkbox-group">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="edit-free-skill-web" value="Web Development">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Web Dev</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="edit-free-skill-graphic" value="Graphic Design">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Design</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" id="edit-free-skill-video" value="Video Editing">
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Video</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Payment Status</label>
+            <select id="edit-free-pay-status" class="form-control">
+              <option value="Cleared">Cleared</option>
+              <option value="Due">Due</option>
+              <option value="Partially Paid">Partially Paid</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Due (₹ INR)</label>
+            <input type="number" id="edit-free-pay-due" class="form-control" min="0" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Payment Cleared (₹ INR)</label>
+            <input type="number" id="edit-free-pay-cleared" class="form-control" min="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Availability Status</label>
+            <select id="edit-free-status" class="form-control">
+              <option value="Active">Active on Project</option>
+              <option value="Available">Available</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-edit-freelancer">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Save Freelancer Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Assign Project to Freelancer -->
+  <div id="modal-assign-project" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">WORK DISPATCH</span>
+          <h3 class="modal-title">Assign Project to Freelancer</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-assign-project">&times;</button>
+      </div>
+      <form id="form-assign-project" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <input type="hidden" id="assign-proj-freelancer-id">
+        <div class="subpage-metric-strip" style="margin-bottom: 16px; grid-template-columns: 1fr;">
+          <div class="sub-metric">
+            <span class="sub-label">Assigning Specialist</span>
+            <span class="sub-value" id="assign-proj-freelancer-display">Aarav Sharma</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select Project Deliverable</label>
+          <select id="assign-proj-select" class="form-control" required>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assignment Notes / Sprint Milestone</label>
+          <textarea id="assign-proj-notes" class="form-control" style="height: 60px; padding: 10px;" placeholder="e.g. Lead frontend dashboard integration and responsive validation..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-assign-project">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Assign Deliverable</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: View Freelancer Assigned Projects -->
+  <div id="modal-view-freelancer-projects" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card" style="max-width: 680px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">ALLOCATION AUDIT</span>
+          <h3 class="modal-title" id="view-proj-modal-title">Assigned Projects</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-view-freelancer-projects">&times;</button>
+      </div>
+      <div class="modal-form">
+        <div id="view-proj-list-container">
+          <!-- Populated dynamically -->
+        </div>
+        <div class="modal-footer" style="padding-top: 14px;">
+          <button type="button" class="btn-secondary" data-close-modal="modal-view-freelancer-projects">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Record Client Payment -->
+  <div id="modal-record-payment" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">REVENUE ACCOUNTING</span>
+          <h3 class="modal-title">Record Client Invoice &amp; Settlement</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-record-payment">&times;</button>
+      </div>
+      <form id="form-record-payment" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Client Name</label>
+            <input type="text" id="new-pay-client" class="form-control" placeholder="e.g. Nexus Financial Labs" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Project Reference</label>
+            <input type="text" id="new-pay-project" class="form-control" placeholder="e.g. Fintech Fraud Detection API" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Invoice Amount (₹ INR)</label>
+            <input type="number" id="new-pay-amount" class="form-control" placeholder="85000" min="100" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Status</label>
+            <select id="new-pay-status" class="form-control">
+              <option value="Paid">Paid (Settled)</option>
+              <option value="Pending">Pending Clearance</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-record-payment">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Record Invoice</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Release Freelancer Payout -->
+  <div id="modal-freelancer-payout" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">ESCROW DISBURSEMENT</span>
+          <h3 class="modal-title">Release Freelancer Milestone Payout</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-freelancer-payout">&times;</button>
+      </div>
+      <form id="form-freelancer-payout" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Specialist Freelancer</label>
+            <input type="text" id="new-payout-freelancer" class="form-control" placeholder="e.g. Elena Rostova" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Project Allocation</label>
+            <input type="text" id="new-payout-project" class="form-control" placeholder="e.g. NextGen Cloud Gateway" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Milestone Deliverable</label>
+            <input type="text" id="new-payout-milestone" class="form-control" placeholder="e.g. Core API Gateway Ingress" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hours Logged</label>
+            <input type="number" id="new-payout-hours" class="form-control" placeholder="35" min="1" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Disbursement Amount (₹ INR)</label>
+            <input type="number" id="new-payout-amount" class="form-control" placeholder="38500" min="100" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Disbursement Status</label>
+            <select id="new-payout-status" class="form-control">
+              <option value="Paid">Paid (Released)</option>
+              <option value="Pending">Pending Audit</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-freelancer-payout">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Release Disbursement</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Provision Freelancer Portal Access (Step 2 of Talent Workflow) -->
+  <div id="modal-provision-freelancer" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">PORTAL ACCESS PROVISIONING</span>
+          <h3 class="modal-title">Issue Freelancer Login ID &amp; Password</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-provision-freelancer">&times;</button>
+      </div>
+      <form id="form-provision-freelancer" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <div class="form-group">
+          <label class="form-label">1. Select Registered Freelancer</label>
+          <select id="prov-free-select" class="form-control" required>
+            <option value="">-- Choose Onboarded Freelancer --</option>
+            <!-- Populated dynamically -->
+          </select>
+          <input type="hidden" id="prov-free-name">
+          <input type="hidden" id="prov-free-id">
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Portal Login Email / ID</label>
+            <input type="email" id="prov-free-email" class="form-control" placeholder="freelancer@apex.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigned Work / Project Deliverable</label>
+            <input type="text" id="prov-free-project" class="form-control" placeholder="e.g. NextGen Cloud Gateway" required>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <div class="label-row">
+              <label class="form-label">Set Portal Password (Admin Defined)</label>
+              <button type="button" class="link-action-btn" id="btn-gen-free-pass">Generate Suggestion</button>
+            </div>
+            <input type="text" id="prov-free-password" class="form-control font-mono" placeholder="Set custom pass e.g. FreeSec#2026" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Work Deliverable / Milestone</label>
+            <input type="text" id="prov-free-milestone" class="form-control" placeholder="e.g. API Gateway MTLS Ingress" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Access Credential Status (Google Sheet Approval Dropdown)</label>
+          <select id="prov-free-status" class="form-control">
+            <option value="Active" selected>Active (Approved)</option>
+            <option value="Pending Approval">Pending Approval (Awaiting Super Admin Approval)</option>
+            <option value="Blocked">Blocked / Suspended</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-provision-freelancer">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Issue &amp; Grant Portal Access</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Create New Admin User -->
+  <div id="modal-new-admin" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">SUPER ADMIN PRIVILEGES</span>
+          <h3 class="modal-title">Create Admin User &amp; Set Security Pass</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-new-admin">&times;</button>
+      </div>
+      <form id="form-new-admin" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Administrator Full Name</label>
+            <input type="text" id="admin-create-name" class="form-control" placeholder="e.g. Alex Morgan" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Admin Role Assignment</label>
+            <select id="admin-create-role" class="form-control">
+              <option value="Operations Admin">Operations Admin (Projects &amp; Talent)</option>
+              <option value="Financial Admin">Financial Admin (Billing &amp; Payouts)</option>
+              <option value="Security Auditor">Security Auditor (Read-Only Telemetry)</option>
+              <option value="Super Admin">Super Admin (Full Privileges)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Admin ID / Login Email (Owner Issued)</label>
+            <input type="email" id="admin-create-email" class="form-control" placeholder="alex.morgan@admin.apex.com" required>
+          </div>
+          <div class="form-group">
+            <div class="label-row">
+              <label class="form-label">Admin Security Key / Password (Admin Defined)</label>
+              <button type="button" class="link-action-btn" id="btn-gen-admin-pass">Generate Strong Key</button>
+            </div>
+            <input type="text" id="admin-create-password" class="form-control font-mono" placeholder="Set custom pass e.g. AdminSec#1200" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Initial Account Status (Google Sheet Approval Workflow)</label>
+          <select id="admin-create-status" class="form-control">
+            <option value="Pending Approval" selected>Pending Approval (Requires Super Admin in Google Sheet / Dashboard)</option>
+            <option value="Active">Active (Pre-Approved Immediately)</option>
+            <option value="Blocked">Blocked / Suspended</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Permissions &amp; Access Boundaries</label>
+          <div style="display: flex; gap: 16px; margin-top: 6px; flex-wrap: wrap;">
+            <label class="custom-checkbox">
+              <input type="checkbox" checked>
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Projects Access</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" checked>
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Freelancers &amp; Talent</span>
+            </label>
+            <label class="custom-checkbox">
+              <input type="checkbox" checked>
+              <span class="checkmark"></span>
+              <span class="checkbox-label">Financial Approvals</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close-modal="modal-new-admin">Cancel</button>
+          <button type="submit" class="btn-primary-red-sm">Create Admin Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Live Freelancer Portal Simulator -->
+  <div id="modal-simulate-freelancer-portal" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card" style="max-width: 720px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge">FREELANCER LIVE WORKSPACE &bull; SECURE SESSION</span>
+          <h3 class="modal-title">Freelancer Portal Preview &mdash; Elena Rostova</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-simulate-freelancer-portal">&times;</button>
+      </div>
+      <div class="modal-form">
+        <!-- Freelancer Portal Mini Dashboard Simulation -->
+        <div class="subpage-metric-strip" style="margin-bottom: 16px;">
+          <div class="sub-metric">
+            <span class="sub-label">Assigned Work</span>
+            <span class="sub-value">NextGen Gateway</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Agreed Billing Rate</span>
+            <span class="sub-value font-mono">₹1,500.00/hr</span>
+          </div>
+          <div class="sub-metric">
+            <span class="sub-label">Hours Logged This Sprint</span>
+            <span class="sub-value font-mono">45.0 Hours</span>
+          </div>
+          <div class="sub-metric highlight-warning">
+            <span class="sub-label">Escrow Milestone Payout</span>
+            <span class="sub-value font-mono text-green">₹67,500.00</span>
+          </div>
+        </div>
+
+        <div class="table-card" style="margin-bottom: 16px; background: #0e0e13;">
+          <div class="table-card-header">
+            <h4 class="card-heading">Active Assigned Tasks &amp; Milestones</h4>
+            <span class="status-pill active">Sprint 3 Active</span>
+          </div>
+          <p style="font-size: 12.5px; color: #a1a1aa; margin-bottom: 12px;">
+            Deliverable: <strong>Core Microservices API Ingress &amp; MTLS Validation Layer</strong>
+          </p>
+          <div class="cell-progress-wrap" style="margin-bottom: 16px;">
+            <div class="cell-progress-bar">
+              <div class="cell-progress-fill fill-green" style="width: 85%"></div>
+            </div>
+            <span class="cell-pct">85% Complete</span>
+          </div>
+          <form id="form-freelancer-submit-work" onsubmit="event.preventDefault(); showToast('Milestone deliverable submitted for Super Admin review!', 'success'); closeModal('modal-simulate-freelancer-portal');">
+            <div class="form-group">
+              <label class="form-label">Submit Pull Request / Deliverable Link</label>
+              <input type="text" class="form-control" value="https://github.com/apex-corp/gateway-ingress/pull/84" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sprint Delivery Notes</label>
+              <textarea class="form-control" style="height: 60px; padding: 10px;" placeholder="Unit tests passing with 98% coverage. MTLS certificates configured for production.">Completed MTLS handshake benchmark. Latency reduced to 1.8ms under 10k RPS load.</textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px;">
+              <button type="submit" class="btn-primary-red-sm">Submit Work Deliverable</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer" style="padding-top: 12px; margin-top: 0;">
+          <span style="font-size: 11px; color: #71717a; margin-right: auto;">Session Token: AES-256-GCM &bull; Authenticated via Owner ID</span>
+          <button type="button" class="btn-secondary" data-close-modal="modal-simulate-freelancer-portal">Close Simulator</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 5. SLIDE-IN DETAIL INSPECTION DRAWER                    -->
+  <!-- ======================================================== -->
+  <div id="detail-drawer-backdrop" class="slide-drawer-backdrop" onclick="closeDetailDrawer()"></div>
+  <aside id="detail-slide-drawer" class="slide-drawer" aria-label="Entity Inspection Panel">
+    <div class="drawer-header">
+      <div>
+        <span class="drawer-pretitle" id="drawer-pretitle">PRJ-301</span>
+        <h3 class="drawer-title" id="drawer-title">Project Overview</h3>
+      </div>
+      <button class="drawer-close-btn" onclick="closeDetailDrawer()" title="Close Drawer">&times;</button>
+    </div>
+    <div class="drawer-body" id="drawer-content-body">
+      <!-- Injected dynamically via openDetailDrawer() -->
+    </div>
+    <div class="drawer-footer" id="drawer-footer">
+      <button class="btn-drawer-edit" id="btn-drawer-action" onclick="">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        <span id="btn-drawer-action-text">Edit Details</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: GOOGLE SHEETS LIVE SYNC & DATABASE CENTER         -->
+  <!-- ======================================================== -->
+  <div id="modal-google-sheets-sync" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card" style="max-width: 640px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3);">DATABASE PERSISTENCE &amp; CLOUD SYNC</span>
+          <h3 class="modal-title">Google Sheets Live Sync Center</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-google-sheets-sync">&times;</button>
+      </div>
+      <div class="modal-form" style="display: flex; flex-direction: column; gap: 16px;">
+        
+        <!-- Live Status Bar -->
+        <div class="sync-banner-card">
+          <div class="sync-banner-left">
+            <span class="sync-pulse-dot" id="sheet-sync-status-icon"></span>
+            <div>
+              <div class="sync-banner-title" id="sheet-sync-status-title">LocalStorage Active (Offline-First)</div>
+              <div class="sync-banner-sub" id="sheet-sync-status-sub">All edits, deletions, and records persist automatically in your browser.</div>
+            </div>
+          </div>
+          <span class="sync-time-stamp" id="sheet-last-sync-time">Last Synced: Just now</span>
+        </div>
+
+        <!-- Google Apps Script Web App URL -->
+        <div class="form-group">
+          <label class="form-label" style="display: flex; justify-content: space-between;">
+            <span>Google Apps Script Web App URL</span>
+            <span style="font-size: 11px; color: #a1a1aa;">Exec endpoint for 8-sheet database</span>
+          </label>
+          <div style="display: flex; gap: 8px;">
+            <input type="url" id="google-sheets-url" class="form-control" placeholder="https://script.google.com/macros/s/AKfycb.../exec" style="padding-left: 14px;">
+            <button type="button" class="btn-primary-red-sm" id="btn-save-sheet-url" style="white-space: nowrap; flex-shrink: 0;">Save &amp; Connect</button>
+          </div>
+        </div>
+
+        <!-- Action Control Buttons -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+          <button type="button" class="btn-secondary" id="btn-test-sheet-conn" style="justify-content: center; font-size: 12px; padding: 9px 10px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Test Connection
+          </button>
+          <button type="button" class="btn-secondary" id="btn-pull-sheet-data" style="justify-content: center; font-size: 12px; padding: 9px 10px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Pull from Sheets
+          </button>
+          <button type="button" class="btn-secondary" id="btn-push-sheet-data" style="justify-content: center; font-size: 12px; padding: 9px 10px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Push to Sheets
+          </button>
+        </div>
+
+        <!-- 8 Synchronized Worksheets Grid -->
+        <div>
+          <div style="font-size: 11.5px; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+            Synchronized Sheets Architecture (8 Modules)
+          </div>
+          <div class="sync-sheets-grid">
+            <div class="sync-sheet-pill"><span class="pill-dot"></span>1. Admin (RBAC)</div>
+            <div class="sync-sheet-pill"><span class="pill-dot"></span>2. Freelancers (Core 3 Skills)</div>
+            <div class="sync-sheet-pill"><span class="pill-dot"></span>3. Clients (Services &amp; Due)</div>
+            <div class="sync-sheet-pill"><span class="pill-dot"></span>4. Projects (Service Dropdowns)</div>
+            <div class="sync-sheet-pill"><span class="pill-dot"></span>5. Payments (Invoices &amp; Payouts)</div>
+            <div class="sync-sheet-pill"><span class="pill-dot"></span>6. Completed Projects</div>
+            <div class="sync-sheet-pill"><span class="pill-dot"></span>7. Deleted Items (Audited by User)</div>
+            <div class="sync-sheet-pill"><span class="pill-dot"></span>8. Login Activity (Timestamps)</div>
+          </div>
+        </div>
+
+        <!-- Google Apps Script One-Click Copy & Quick Setup Guide -->
+        <div class="sync-guide-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="color: #ffffff; font-size: 12.5px;">Deploy in Google Sheets (1 Minute Setup)</strong>
+            <button type="button" class="btn-primary-red-sm" id="btn-copy-gas-code" style="padding: 5px 10px; font-size: 11px;">
+              📋 Copy Google Script Code
+            </button>
+          </div>
+          <ol style="margin: 0; padding-left: 18px; font-size: 11.5px; color: #a1a1aa; line-height: 1.6;">
+            <li>Open a new or existing Google Sheet &rarr; Click <strong>Extensions &gt; Apps Script</strong>.</li>
+            <li>Paste the copied script &rarr; Select <strong><code>setupGoogleSheets</code></strong> from toolbar &rarr; Click <strong>Run</strong> (auto-generates all 8 sheets with Core 3 dropdown validations).</li>
+            <li>Click <strong>Deploy &gt; New deployment &gt; Web app</strong> &rarr; Set Who has access: <strong>Anyone</strong>.</li>
+            <li>Copy the Web App URL, paste it above, and click <strong>Save &amp; Connect</strong>!</li>
+          </ol>
+        </div>
+
+        <div class="modal-footer" style="padding: 0; margin-top: 4px;">
+          <span style="font-size: 11px; color: #71717a; margin-right: auto;">Local backup verified: Data never lost on page refresh.</span>
+          <button type="button" class="btn-secondary" data-close-modal="modal-google-sheets-sync">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Delete Confirmation -->
+  <div id="modal-delete-confirm" class="modal-backdrop hidden" aria-hidden="true">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-badge" style="background: rgba(229,9,20,0.15); color: #ff2a4b; border-color: rgba(229,9,20,0.3);">PERMANENT REMOVAL</span>
+          <h3 class="modal-title" style="color: #ff3b56;">Confirm Deletion</h3>
+        </div>
+        <button class="modal-close-btn" data-close-modal="modal-delete-confirm">&times;</button>
+      </div>
+      <div class="modal-form" style="padding-top: 10px;">
+        <p id="delete-confirm-message" style="color: #d4d4d8; font-size: 13.5px; line-height: 1.5; margin-bottom: 20px;">
+          Are you sure you want to permanently delete this record? This action cannot be undone.
+        </p>
+        <div class="modal-footer" style="padding: 0;">
+          <button type="button" class="btn-secondary" data-close-modal="modal-delete-confirm">Cancel</button>
+          <button type="button" class="btn-primary-red-sm" id="btn-confirm-delete-action">Delete Record</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>

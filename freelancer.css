@@ -1,0 +1,303 @@
+/* ==========================================================================
+   ApexCore Freelancer Portal Stylesheet
+   Executive Crimson & Obsidian Theme • Zero Glow • Mobile Responsive
+   ========================================================================== */
+
+/* Layout & Canvas */
+.freelancer-body {
+  background-color: var(--bg-core);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+/* Projects Grid */
+.projects-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+/* Project Card */
+.fl-project-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--border-radius-lg);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+  position: relative;
+}
+
+.fl-project-card:hover {
+  border-color: rgba(229, 9, 20, 0.4);
+  transform: translateY(-2px);
+}
+
+.fl-proj-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.fl-proj-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.fl-service-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(229, 9, 20, 0.12);
+  color: var(--red-ember);
+  border: 1px solid rgba(229, 9, 20, 0.25);
+  white-space: nowrap;
+}
+
+.fl-proj-client {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.fl-proj-client svg {
+  color: var(--text-muted);
+}
+
+.fl-proj-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--border-radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.fl-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fl-meta-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.fl-meta-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+/* Progress Control */
+.fl-progress-section {
+  margin-bottom: 16px;
+}
+
+.fl-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.fl-progress-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.fl-progress-pct {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--red-ember);
+  font-family: var(--font-mono);
+}
+
+.fl-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.fl-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #b91c1c, #e50914);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Interactive Slider within Card */
+.fl-quick-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 6px;
+}
+
+.fl-quick-slider {
+  flex: 1;
+  accent-color: var(--red-primary);
+  height: 4px;
+}
+
+.fl-btn-save-prog {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.fl-btn-save-prog:hover {
+  background: var(--red-primary);
+}
+
+/* Notes Section */
+.fl-proj-notes {
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid var(--red-primary);
+  padding: 8px 10px;
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 16px;
+  line-height: 1.45;
+}
+
+/* Card Actions */
+.fl-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.fl-btn-submit-work {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 14px;
+  background: rgba(229, 9, 20, 0.12);
+  border: 1px solid rgba(229, 9, 20, 0.35);
+  border-radius: var(--border-radius-sm);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.fl-btn-submit-work:hover {
+  background: var(--red-primary);
+}
+
+.fl-btn-log-time {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  background: var(--surface-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.fl-btn-log-time:hover {
+  background: var(--surface-hover);
+  color: #fff;
+}
+
+/* Timesheet Layout */
+.timesheet-layout-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+/* Empty States */
+.fl-empty-state {
+  grid-column: 1 / -1;
+  padding: 48px 24px;
+  text-align: center;
+  background: var(--surface-card);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--border-radius-lg);
+}
+
+.fl-empty-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  color: var(--text-muted);
+}
+
+.fl-empty-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.fl-empty-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* Form Range input custom style */
+.form-range {
+  width: 100%;
+  accent-color: var(--red-primary);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .timesheet-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .projects-grid-container {
+    grid-template-columns: 1fr;
+  }
+}
