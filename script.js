@@ -695,48 +695,21 @@ window.executeAdminLogin = async function executeAdminLogin(e) {
     }
 
     try { StorageManager.save(); } catch (e) { }
-    try { GoogleSheetsSync.updateAdminLogin(authenticatedAdmin); } catch (e) { }
 
-    // Trigger full-page cinematic loading sequence
+    // Fire Google Sheets background update asynchronously without blocking UI
+    setTimeout(() => {
+      try { GoogleSheetsSync.updateAdminLogin(authenticatedAdmin); } catch (e) { }
+      if (GoogleSheetsSync.getUrl()) {
+        try { GoogleSheetsSync.pullAll({ silent: true }); } catch (e) { }
+      }
+    }, 50);
+
+    // Trigger instant snappy cinematic sequence
     triggerCinematicSequence(authenticatedAdmin);
   }
 
   try {
-    // 1. Live Google Sheets Cloud Sync & Fresh Account Check
-    const gasUrl = GoogleSheetsSync.getUrl();
-    if (gasUrl) {
-      try {
-        const res = await fetch(gasUrl);
-        const json = await res.json();
-        if (json && json.status === 'success') {
-          if (Array.isArray(json.adminUsers)) {
-            MockDataStore.adminUsers = sanitizeAdminUsers(json.adminUsers);
-          }
-          if (Array.isArray(json.clients)) MockDataStore.clients = json.clients.filter(x => !isDemoRecord(x));
-          if (Array.isArray(json.projects)) MockDataStore.projects = json.projects.filter(x => !isDemoRecord(x));
-          if (Array.isArray(json.freelancers)) MockDataStore.freelancers = json.freelancers.filter(x => !isDemoRecord(x));
-          if (Array.isArray(json.freelancerAdmin)) {
-            MockDataStore.freelancerCredentials = json.freelancerAdmin.filter(x => !isDemoRecord(x));
-          } else if (Array.isArray(json.freelancerCredentials)) {
-            MockDataStore.freelancerCredentials = json.freelancerCredentials.filter(x => !isDemoRecord(x));
-          }
-          if (Array.isArray(json.clientPayments)) MockDataStore.clientPayments = json.clientPayments.filter(x => !isDemoRecord(x));
-          if (Array.isArray(json.freelancerDisbursements)) MockDataStore.freelancerDisbursements = json.freelancerDisbursements.filter(x => !isDemoRecord(x));
-          if (Array.isArray(json.completedProjects)) MockDataStore.completedProjects = json.completedProjects.filter(x => !isDemoRecord(x));
-          if (Array.isArray(json.deletedItems)) MockDataStore.deletedItems = json.deletedItems.filter(x => !isDemoRecord(x));
-
-          // Dynamically recalculate all KPIs and views with real Google Sheets data
-          recalculateRealKPIs();
-          populateProjectFreelancerDropdowns();
-          syncRealFreelancerCredentials();
-          StorageManager.save();
-        }
-      } catch (gasErr) {
-        console.warn('[Login] Live Google Sheets fetch warning, checking local store:', gasErr);
-      }
-    } else {
-      StorageManager.load();
-    }
+    StorageManager.load();
 
     // Helper functions
     function matchAdmin(adm) {
@@ -752,7 +725,7 @@ window.executeAdminLogin = async function executeAdminLogin(e) {
       return String(adm.pass || adm.password || adm.key || adm.secKey || '').trim();
     }
 
-    // 2. Search all real admin accounts (MockDataStore + Stored admins)
+    // 1. Search cached admin accounts (MockDataStore + Stored admins) for instant authentication
     const allAdmins = [
       ...(MockDataStore.adminUsers || []),
       ...getStoredAdmins()
@@ -772,7 +745,25 @@ window.executeAdminLogin = async function executeAdminLogin(e) {
     }
 
     // Check matching admin
-    const matchedAdmin = uniqueAdmins.find(matchAdmin);
+    let matchedAdmin = uniqueAdmins.find(matchAdmin);
+
+    // 2. If not found in local cache and Google Sheets is connected, do a quick cloud lookup
+    if (!matchedAdmin && GoogleSheetsSync.getUrl()) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch(GoogleSheetsSync.getUrl(), { signal: controller.signal });
+        clearTimeout(timeoutId);
+        const json = await res.json();
+        if (json && json.status === 'success' && Array.isArray(json.adminUsers)) {
+          MockDataStore.adminUsers = sanitizeAdminUsers(json.adminUsers);
+          StorageManager.save();
+          matchedAdmin = (MockDataStore.adminUsers || []).find(matchAdmin);
+        }
+      } catch (e) {
+        console.warn('[Login] Quick cloud verify timed out or offline:', e);
+      }
+    }
 
     if (matchedAdmin) {
       const storedPass = getAdminPassword(matchedAdmin);
@@ -814,7 +805,7 @@ window.executeAdminLogin = async function executeAdminLogin(e) {
         return;
       }
 
-      // Successful login
+      // Instant successful login
       completeAdminAuth(matchedAdmin);
       return;
     }
@@ -888,7 +879,7 @@ function showLoginError(customMsg) {
 }
 
 /**
- * Snappy Cinematic Loading Sequence & Transition into Dashboard
+ * Snappy Cinematic Loading Sequence & Transition into Dashboard (Fast 350ms)
  */
 function triggerCinematicSequence(admin) {
   currentAuthenticatedAdmin = admin || { name: 'Jay', role: 'Super Admin', email: 'Jay@admin.com' };
@@ -920,11 +911,11 @@ function triggerCinematicSequence(admin) {
     try { particleEngine.start(); } catch (e) { }
 
     executeLoadingTimeline(currentAuthenticatedAdmin);
-  }, 200);
+  }, 40);
 }
 
 function executeLoadingTimeline(admin) {
-  const duration = 1100; // ~1.1s snappy futuristic transition
+  const duration = 350; // Ultra-snappy 350ms futuristic transition
   const startTime = performance.now();
   const circumference = 2 * Math.PI * 72;
   const firstName = (admin && admin.name) ? admin.name.split(' ')[0] : 'Admin';
@@ -984,7 +975,7 @@ function executeLoadingTimeline(admin) {
       // 100% Reached: Transition straight into Dashboard
       setTimeout(() => {
         completeCinematicReveal();
-      }, 150);
+      }, 40);
     }
   }
 
@@ -1027,7 +1018,7 @@ function completeCinematicReveal() {
     const adm = AppState.currentAdmin || { email: 'Jay@admin.com', name: 'Jay', role: 'Super Admin' };
     try { GoogleSheetsSync.logLogin('Admin', adm.email, `${adm.name} (${adm.role})`); } catch (e) { }
     showToast(`Authenticated as ${adm.role}: ${adm.name}`, "success");
-  }, 250);
+  }, 60);
 }
 
 /* ----------------------------------------------------------------------------

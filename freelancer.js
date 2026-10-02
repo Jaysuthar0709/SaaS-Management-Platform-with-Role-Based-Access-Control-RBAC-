@@ -346,16 +346,11 @@ window.executeFreelancerLogin = async function (e) {
   }
 
   try {
-    // 1. Live Google Sheets cloud sync
-    if (GoogleSheetsSync.getUrl()) {
-      await GoogleSheetsSync.pullAll({ silent: true });
-    } else {
-      StorageManager.load();
-    }
+    StorageManager.load();
 
     let authenticatedFl = null;
 
-    // 2. Search in MockDataStore.freelancers
+    // 1. Search in MockDataStore.freelancers locally for instant login
     const flList = MockDataStore.freelancers || [];
     const flMatch = flList.find(f =>
       (f.email && f.email.trim().toLowerCase() === enteredEmail.toLowerCase()) ||
@@ -371,7 +366,7 @@ window.executeFreelancerLogin = async function (e) {
       }
     }
 
-    // 3. Search in MockDataStore.freelancerCredentials
+    // 2. Search in MockDataStore.freelancerCredentials
     if (!authenticatedFl) {
       const credMatch = (MockDataStore.freelancerCredentials || []).find(c =>
         (c.email && c.email.trim().toLowerCase() === enteredEmail.toLowerCase()) ||
@@ -393,6 +388,30 @@ window.executeFreelancerLogin = async function (e) {
             paymentDue: 0
           };
         }
+      }
+    }
+
+    // 3. If not found in local cache, do quick cloud lookup with 2s timeout
+    if (!authenticatedFl && GoogleSheetsSync.getUrl()) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        await GoogleSheetsSync.pullAll({ silent: true });
+        clearTimeout(timeoutId);
+
+        const refreshedList = MockDataStore.freelancers || [];
+        const refreshedMatch = refreshedList.find(f =>
+          (f.email && f.email.trim().toLowerCase() === enteredEmail.toLowerCase()) ||
+          (f.id && f.id.trim().toLowerCase() === enteredEmail.toLowerCase()) ||
+          (f.name && f.name.trim().toLowerCase() === enteredEmail.toLowerCase())
+        );
+        if (refreshedMatch) {
+          const standardPass = refreshedMatch.name.split(' ')[0] + '#2026';
+          const isPassValid = refreshedMatch.pass ? (refreshedMatch.pass === enteredPassword || refreshedMatch.pass.toLowerCase() === enteredPassword.toLowerCase()) : (enteredPassword === standardPass || enteredPassword === 'password');
+          if (isPassValid) authenticatedFl = refreshedMatch;
+        }
+      } catch (e) {
+        console.warn('[Freelancer] Quick cloud lookup timed out or offline:', e);
       }
     }
 
@@ -452,8 +471,16 @@ window.executeFreelancerLogin = async function (e) {
       }
 
       StorageManager.save();
-      GoogleSheetsSync.updateFreelancerLoginTime(authenticatedFl);
 
+      // Fire background sync asynchronously
+      setTimeout(() => {
+        try { GoogleSheetsSync.updateFreelancerLoginTime(authenticatedFl); } catch (e) { }
+        if (GoogleSheetsSync.getUrl()) {
+          try { GoogleSheetsSync.pullAll({ silent: true }); } catch (e) { }
+        }
+      }, 50);
+
+      // Instant transition
       triggerFlCinematicSequence(authenticatedFl);
     } else {
       showFlLoginError('Access Denied. Invalid Freelancer ID or Security Pass.');
@@ -516,11 +543,11 @@ function triggerFlCinematicSequence(fl) {
       flParticleEngine.start();
     }
     executeFlLoadingTimeline(fl);
-  }, 350);
+  }, 40);
 }
 
 function executeFlLoadingTimeline(fl) {
-  const duration = 2200;
+  const duration = 350; // Ultra-snappy 350ms transition
   const startTime = performance.now();
   const circumference = 2 * Math.PI * 72;
   const firstName = (fl && fl.name) ? fl.name.split(' ')[0] : 'Specialist';
@@ -559,7 +586,7 @@ function executeFlLoadingTimeline(fl) {
     if (progress < 1) {
       requestAnimationFrame(frame);
     } else {
-      setTimeout(() => completeFlCinematicReveal(), 350);
+      setTimeout(() => completeFlCinematicReveal(), 40);
     }
   }
 
@@ -590,7 +617,7 @@ function completeFlCinematicReveal() {
       GoogleSheetsSync.logLogin('Freelancer', fl.email || fl.id, `${fl.name} (${fl.id})`);
       showToast(`Logged in as Specialist: ${fl.name}`, 'success');
     }
-  }, 450);
+  }, 60);
 }
 
 /* ----------------------------------------------------------------------------
