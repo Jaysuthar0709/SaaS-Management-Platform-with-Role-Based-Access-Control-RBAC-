@@ -123,22 +123,20 @@ function getStoredAdmins() {
 
 function isDemoRecord(item) {
   if (!item || typeof item !== 'object') return false;
-  const demoIds = [
-    'CLT-101', 'CLT-102', 'CLT-103', 'CLT-104', 'CLT-105', 'CLT-106',
-    'PRJ-301', 'PRJ-302', 'PRJ-303', 'PRJ-304', 'PRJ-305', 'PRJ-306',
-    'FL-101', 'FL-102', 'FL-103', 'FL-104', 'FL-105', 'FL-106',
-    'INV-2026-881', 'INV-2026-882', 'INV-2026-883', 'INV-2026-884', 'INV-2026-885',
-    'DSB-4401', 'DSB-4402', 'DSB-4403', 'DSB-4404', 'DSB-4405',
-    'FCR-201', 'FCR-202', 'FCR-203', 'FCR-204', 'FCR-205'
-  ];
-  if (item.id && demoIds.includes(String(item.id).trim())) return true;
-  const name = (item.clientName || item.projectName || item.name || item.fullName || '').trim();
   const demoNames = [
     'Apex Logistics Global', 'FinTech Sentinel Corp', 'Nexus Cloud Systems', 'BioPharm Labs Inc', 'Quantum Retail Group', 'Starlight Media Network',
     'NextGen CRM Portal', 'Cloud Infrastructure Migration', 'BioPharm Analytics Platform', 'Cybersecurity Audit & Hardening', 'Omnichannel E-Commerce Suite', 'High-Frequency Streaming Engine',
     'Marcus Vance', 'Dr. Elena Rostova', 'Kaelen Thorne', 'Aria Chen', 'Devon Bailey', 'Sora Takahashi'
   ];
-  if (demoNames.includes(name)) return true;
+  const demoEmails = [
+    'marcus@vance.io', 'elena.rostova@biopharm.org', 'kaelen.thorne@design.io', 'aria.chen@clouddev.com', 'devon.bailey@videopro.io', 'sora.takahashi@webcraft.com',
+    'contact@apexlogistics.com', 'security@fintechsentinel.com', 'ops@nexuscloud.io', 'research@biopharm.org', 'ecommerce@quantumretail.com', 'media@starlight.com'
+  ];
+  const name = String(item.clientName || item.projectName || item.name || item.fullName || '').trim().toLowerCase();
+  const email = String(item.email || '').trim().toLowerCase();
+
+  if (demoNames.some(dn => dn.toLowerCase() === name)) return true;
+  if (email && demoEmails.some(de => de.toLowerCase() === email)) return true;
   return false;
 }
 
@@ -2053,7 +2051,7 @@ function syncRealFreelancerCredentials() {
     );
     const projName = assignedProj ? assignedProj.name : 'Sprint In Progress';
     const milestone = assignedProj ? (assignedProj.notes || 'Deliverable Scoped') : 'Milestone Scoped';
-    const pass = f.pass || (existing ? existing.pass : null) || (f.name.split(' ')[0] + '#2026');
+    const pass = f.pass || (existing ? existing.pass : null) || (f.name ? f.name.split(' ')[0] + '#2026' : 'Freelancer#2026');
 
     if (!existing) {
       creds.push({
@@ -2076,11 +2074,29 @@ function syncRealFreelancerCredentials() {
     }
   });
 
-  if (freelancers.length > 0) {
-    const validIds = new Set(freelancers.map(f => f.id));
-    const validEmails = new Set(freelancers.map(f => f.email ? f.email.toLowerCase() : ''));
-    MockDataStore.freelancerCredentials = creds.filter(c => validIds.has(c.id) || (c.email && validEmails.has(c.email.toLowerCase())));
-  }
+  // Ensure standalone credentials exist in freelancers list as well
+  creds.forEach(c => {
+    if (!c) return;
+    const exists = freelancers.some(f => (f.id && f.id === c.id) || (f.email && c.email && f.email.toLowerCase() === c.email.toLowerCase()));
+    if (!exists) {
+      freelancers.push({
+        id: c.id,
+        name: c.name,
+        email: c.email,
+        phone: "+91 98000 00000",
+        pass: c.pass || (c.name ? c.name.split(' ')[0] + '#2026' : 'Freelancer#2026'),
+        skills: ["Web Development"],
+        paymentStatus: "Cleared",
+        paymentCleared: 0,
+        paymentDue: 0,
+        assignedProjects: [],
+        status: c.status || "Active"
+      });
+    }
+  });
+
+  MockDataStore.freelancers = freelancers;
+  MockDataStore.freelancerCredentials = creds;
 }
 
 // 6. Freelancer Portal Accounts View
@@ -3613,7 +3629,7 @@ function setupModalHandlers() {
     });
   }
 
-  // Form: New Freelancer
+  // Form: New Freelancer (Simplified to Name, Email, Phone, Skills)
   const formFreelancer = document.getElementById('form-new-freelancer');
   if (formFreelancer) {
     formFreelancer.addEventListener('submit', (e) => {
@@ -3621,21 +3637,41 @@ function setupModalHandlers() {
       const name = document.getElementById('new-free-name').value.trim();
       const email = document.getElementById('new-free-email').value.trim();
       const phone = document.getElementById('new-free-phone').value.trim();
-      const passInput = document.getElementById('new-free-password');
-      const pass = (passInput ? passInput.value.trim() : '') || (name.split(' ')[0] + '#2026');
-      const paymentStatus = document.getElementById('new-free-pay-status').value;
-      const paymentDue = parseInt(document.getElementById('new-free-pay-due').value, 10) || 0;
-      const paymentCleared = parseInt(document.getElementById('new-free-pay-cleared').value, 10) || 0;
-      const status = document.getElementById('new-free-status').value;
+      const firstName = (name.split(' ')[0] || 'Specialist');
+      const pass = firstName + '#2026';
+      const paymentStatus = 'Cleared';
+      const paymentDue = 0;
+      const paymentCleared = 0;
+      const status = 'Active';
 
-      // Read selected Core 3 Skills
+      // Read selected Specialist Skills (Core Services)
       const skillCheckboxes = document.querySelectorAll('input[name="new-free-skill"]:checked');
       const skills = Array.from(skillCheckboxes).map(cb => cb.value);
       if (skills.length === 0) {
         skills.push('Web Development');
       }
 
-      const newId = `FL-${100 + MockDataStore.freelancers.length + 1}`;
+      let maxFlNum = 100;
+      (MockDataStore.freelancers || []).forEach(fl => {
+        if (fl && fl.id) {
+          const match = String(fl.id).match(/FL-(\d+)/i);
+          if (match) {
+            const n = parseInt(match[1], 10);
+            if (n > maxFlNum) maxFlNum = n;
+          }
+        }
+      });
+      (MockDataStore.freelancerCredentials || []).forEach(fc => {
+        if (fc && fc.id) {
+          const match = String(fc.id).match(/FL-(\d+)/i);
+          if (match) {
+            const n = parseInt(match[1], 10);
+            if (n > maxFlNum) maxFlNum = n;
+          }
+        }
+      });
+      const newId = `FL-${maxFlNum + 1}`;
+
       const newFree = {
         id: newId,
         name,
@@ -3649,6 +3685,7 @@ function setupModalHandlers() {
         assignedProjects: [],
         status
       };
+      if (!MockDataStore.freelancers) MockDataStore.freelancers = [];
       MockDataStore.freelancers.unshift(newFree);
 
       // Automatically create portal credential linked to this freelancer
@@ -3660,7 +3697,7 @@ function setupModalHandlers() {
         project: 'Awaiting Project Assignment',
         milestone: 'Deliverable Scoped',
         hours: 0,
-        status: status || 'Active',
+        status: 'Active',
         lastLogin: 'Onboarded Just Now'
       };
       if (!MockDataStore.freelancerCredentials) MockDataStore.freelancerCredentials = [];
@@ -3678,7 +3715,7 @@ function setupModalHandlers() {
       renderAllViews();
       closeModal('modal-new-freelancer');
       formFreelancer.reset();
-      showToast(`Specialist ${name} onboarded with ID ${newId}`, 'success');
+      showToast(`Specialist ${name} onboarded (${newId}) with Password: ${pass}`, 'success');
     });
   }
 

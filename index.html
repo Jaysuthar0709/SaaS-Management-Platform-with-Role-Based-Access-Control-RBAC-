@@ -1654,7 +1654,7 @@
 
   <!-- Modal: Add Freelancer -->
   <div id="modal-new-freelancer" class="modal-backdrop hidden" aria-hidden="true">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 520px;">
       <div class="modal-header">
         <div class="modal-title-wrap">
           <span class="modal-badge">TALENT ONBOARDING</span>
@@ -1663,25 +1663,18 @@
         <button class="modal-close-btn" data-close-modal="modal-new-freelancer">&times;</button>
       </div>
       <form id="form-new-freelancer" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label class="form-label">Freelancer Full Name</label>
-            <input type="text" id="new-free-name" class="form-control" placeholder="e.g. Aarav Sharma" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Freelancer Email</label>
-            <input type="email" id="new-free-email" class="form-control" placeholder="aarav.sharma@freelance.apex.com" required>
-          </div>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="new-free-name" class="form-control" placeholder="e.g. Aarav Sharma" required>
         </div>
         <div class="form-grid-2">
           <div class="form-group">
-            <label class="form-label">Freelancer Number (Phone)</label>
-            <input type="tel" id="new-free-phone" class="form-control" placeholder="+91 98765 43210" required>
+            <label class="form-label">Email Address</label>
+            <input type="email" id="new-free-email" class="form-control" placeholder="aarav.sharma@freelance.apex.com" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Portal Access Password (Admin Defined)</label>
-            <input type="text" id="new-free-password" class="form-control font-mono" placeholder="e.g. SharmaSec#2026">
-            <span class="hint-text">Set password now or issue via Portal Tab later</span>
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="new-free-phone" class="form-control" placeholder="+91 98765 43210" required>
           </div>
         </div>
         <div class="form-group">
@@ -1695,40 +1688,13 @@
             <label class="custom-checkbox">
               <input type="checkbox" name="new-free-skill" value="Graphic Design">
               <span class="checkmark"></span>
-              <span class="checkbox-label">Design</span>
+              <span class="checkbox-label">Graphic Design</span>
             </label>
             <label class="custom-checkbox">
               <input type="checkbox" name="new-free-skill" value="Video Editing">
               <span class="checkmark"></span>
-              <span class="checkbox-label">Video</span>
+              <span class="checkbox-label">Video Editing</span>
             </label>
-          </div>
-        </div>
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label class="form-label">Payment Information Status</label>
-            <select id="new-free-pay-status" class="form-control">
-              <option value="Cleared">Cleared</option>
-              <option value="Due">Due</option>
-              <option value="Partially Paid">Partially Paid</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Payment Due Amount (₹)</label>
-            <input type="number" id="new-free-pay-due" class="form-control" placeholder="25000" min="0" value="0" required>
-          </div>
-        </div>
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label class="form-label">Payment Cleared Amount (₹)</label>
-            <input type="number" id="new-free-pay-cleared" class="form-control" placeholder="60000" min="0" value="0" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Availability Status</label>
-            <select id="new-free-status" class="form-control">
-              <option value="Active">Active on Project</option>
-              <option value="Available">Available</option>
-            </select>
           </div>
         </div>
         <div class="modal-footer">
