@@ -186,69 +186,47 @@
   </section>
 
   <!-- ======================================================== -->
-  <!-- 2. FULL-PAGE CINEMATIC LOADING ANIMATION                -->
+  <!-- 2. FULL-PAGE RED & BLACK CURSIVE CALLIGRAPHY LOADER      -->
   <!-- ======================================================== -->
   <div id="cinematic-loader" class="cinematic-overlay hidden" aria-hidden="true" role="dialog">
-    <!-- Dynamic Canvas for Ambient Red Particles & Light Flow -->
+    <!-- Dynamic Canvas for Ambient Red Particle Flow -->
     <canvas id="loader-canvas" class="loader-canvas"></canvas>
 
-    <!-- Central Cinematic Pod -->
-    <div class="cinematic-pod">
-      <!-- Outer Pulsing Glow Rings -->
-      <div class="portal-ring ring-outer"></div>
-      <div class="portal-ring ring-mid"></div>
-      <div class="portal-ring ring-inner"></div>
+    <!-- Deep Red Radial Breathing Aura -->
+    <div class="cursive-ambient-aura"></div>
 
-      <!-- Center Holographic Emblem -->
-      <div class="cinematic-emblem-wrap">
-        <div class="emblem-core">
-          <svg class="cinematic-logo-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <polygon points="32,4 58,18 58,46 32,60 6,46 6,18" stroke="url(#cinematicHexGrad)" stroke-width="2" fill="#09090c"/>
-            <polygon points="32,12 50,22 50,42 32,52 14,42 14,22" stroke="rgba(229, 9, 20, 0.4)" stroke-width="1.5" fill="#131318"/>
-            <!-- Glowing Core -->
-            <path d="M32 20L42 32H35V44H29V32H22L32 20Z" fill="url(#coreFlameGrad)"/>
-            <defs>
-              <linearGradient id="cinematicHexGrad" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#ff2a4b"/>
-                <stop offset="0.5" stop-color="#8b0000"/>
-                <stop offset="1" stop-color="#e50914"/>
-              </linearGradient>
-              <linearGradient id="coreFlameGrad" x1="22" y1="20" x2="42" y2="44" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#ffffff"/>
-                <stop offset="0.3" stop-color="#ff3b56"/>
-                <stop offset="1" stop-color="#e50914"/>
-              </linearGradient>
-            </defs>
-          </svg>
-          <div class="core-radial-flare"></div>
-        </div>
+    <!-- Central Calligraphy & Telemetry Pod -->
+    <div class="cursive-loader-container">
+      <div class="cursive-svg-wrap">
+        <svg class="cursive-loading-svg" viewBox="0 0 950 250" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- High-Luminance Red Gradient -->
+            <linearGradient id="cursiveRedNeonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ff1744" />
+              <stop offset="25%" stop-color="#ff2a4b" />
+              <stop offset="50%" stop-color="#e50914" />
+              <stop offset="75%" stop-color="#ff416c" />
+              <stop offset="100%" stop-color="#ff0844" />
+            </linearGradient>
+          </defs>
 
-        <!-- Futuristic Circular SVG Progress Ring -->
-        <svg class="progress-ring-svg" width="160" height="160">
-          <circle class="progress-ring-bg" cx="80" cy="80" r="72" />
-          <circle id="progress-ring-circle" class="progress-ring-stroke" cx="80" cy="80" r="72" />
+          <!-- Main Crisp Red Calligraphy Stroke -->
+          <path id="cursive-loading-path" class="cursive-path-main" d="M 30,130 L 190,130 C 215,130 230,110 238,80 C 248,38 258,22 266,22 C 274,22 272,48 260,92 L 248,132 C 244,146 254,148 264,136 C 274,124 282,102 300,102 C 320,102 322,122 314,138 C 304,152 284,150 276,136 C 270,124 280,108 300,108 C 312,108 322,112 334,112 C 342,112 350,102 364,102 C 346,102 334,120 334,134 C 334,148 350,150 364,150 C 378,150 386,136 386,112 L 386,142 C 386,148 392,148 400,136 C 408,124 416,102 432,102 C 414,102 402,120 402,134 C 402,148 416,150 432,150 C 446,150 454,136 454,112 L 454,26 C 454,18 450,18 448,26 L 448,142 C 448,148 456,148 466,134 C 474,122 482,110 492,110 L 488,142 C 488,148 496,148 506,134 C 514,122 522,110 534,110 C 527,122 524,134 524,144 C 532,122 544,110 558,110 C 570,110 572,125 572,142 C 572,148 580,146 592,130 C 600,118 608,102 624,102 C 606,102 594,120 594,134 C 594,148 608,150 624,150 C 640,150 648,136 648,112 L 648,168 C 648,206 626,218 610,206 C 600,194 608,180 630,164 L 664,138 C 680,130 705,130 730,130 L 920,130" />
+
+          <!-- Cursive 'i' Dot -->
+          <circle class="cursive-dot" cx="490" cy="84" r="4.5" fill="url(#cursiveRedNeonGrad)" />
         </svg>
       </div>
 
-      <!-- Percentage & Status Stream -->
-      <div class="loader-metrics">
-        <div class="percentage-display">
-          <span id="loader-percentage">0</span><span class="pct-symbol">%</span>
+      <!-- Telemetry & Metric Pod -->
+      <div class="cursive-metrics-pod">
+        <div class="cursive-percentage">
+          <span id="loader-percentage">0</span><span class="cursive-pct-symbol">%</span>
         </div>
-        
-        <div class="status-stage-wrapper">
-          <div class="radar-scan-line"></div>
-          <p id="loader-status-text" class="loader-status-text">Authenticating Admin...</p>
+        <div class="cursive-progress-track">
+          <div id="cursive-progress-bar" class="cursive-progress-bar"></div>
         </div>
-
-        <!-- System Node Breadcrumb -->
-        <div class="loader-stages-indicator">
-          <span class="stage-pip active" data-stage="1"></span>
-          <span class="stage-pip" data-stage="2"></span>
-          <span class="stage-pip" data-stage="3"></span>
-          <span class="stage-pip" data-stage="4"></span>
-          <span class="stage-pip" data-stage="5"></span>
-        </div>
+        <p id="loader-status-text" class="cursive-status-text">INITIALIZING ENCLAVE &bull; AUTHENTICATING ROOT ACCESS</p>
       </div>
     </div>
   </div>
@@ -1357,6 +1335,7 @@
   <!-- ======================================================== -->
 
   <!-- Modal: New Client -->
+  <!-- Modal: Onboard New Client Account -->
   <div id="modal-new-client" class="modal-backdrop hidden" aria-hidden="true">
     <div class="modal-card">
       <div class="modal-header">
@@ -1377,18 +1356,12 @@
             <input type="email" id="new-client-email" class="form-control" placeholder="e.g. contact@nexusglobal.com" required>
           </div>
         </div>
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label class="form-label">Contact Number (Phone)</label>
-            <input type="tel" id="new-client-phone" class="form-control" placeholder="+91 98201 45678" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Initial Payment Due (₹)</label>
-            <input type="number" id="new-client-due" class="form-control" placeholder="45000" min="0" value="0" required>
-          </div>
+        <div class="form-group">
+          <label class="form-label">Contact Number (Phone)</label>
+          <input type="tel" id="new-client-phone" class="form-control" placeholder="+91 98201 45678" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Subscribed Services (Select Core Services)</label>
+          <label class="form-label">Subscribed Services (Core Services)</label>
           <div class="service-checkbox-group">
             <label class="custom-checkbox">
               <input type="checkbox" name="new-client-service" value="Web Development" checked>
@@ -1407,23 +1380,13 @@
             </label>
           </div>
         </div>
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label class="form-label">Active Projects Count</label>
-            <input type="number" id="new-client-projects" class="form-control" placeholder="1" min="0" max="20" value="1" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Account Status</label>
-            <select id="new-client-status" class="form-control">
-              <option value="Active">Active</option>
-              <option value="Onboarding">Onboarding</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label class="form-label">Additional Notes (Admin Purpose &bull; Syncs to Google Sheet)</label>
+          <textarea id="new-client-notes" class="form-control" style="height: 70px; padding: 10px;" placeholder="Add internal admin notes, contract scope, key stakeholder details, or specific delivery preferences..."></textarea>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" data-close-modal="modal-new-client">Cancel</button>
-          <button type="submit" class="btn-primary-red-sm">Create Client Account</button>
+          <button type="submit" class="btn-primary-red-sm">Onboard Client</button>
         </div>
       </form>
     </div>
@@ -1480,6 +1443,10 @@
               <span class="checkbox-label">Video Editing</span>
             </label>
           </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Additional Notes (Admin Purpose &bull; Syncs to Google Sheet)</label>
+          <textarea id="edit-client-notes" class="form-control" style="height: 70px; padding: 10px;" placeholder="Admin notes, contract scope, or instructions..."></textarea>
         </div>
         <div class="form-grid-2">
           <div class="form-group">

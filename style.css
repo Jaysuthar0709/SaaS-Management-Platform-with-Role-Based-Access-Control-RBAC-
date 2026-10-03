@@ -585,26 +585,26 @@ a {
 }
 
 /* --------------------------------------------------------------------------
-   4. FULL-PAGE CINEMATIC LOADING ANIMATION
+   4. FULL-PAGE RED & BLACK CURSIVE CALLIGRAPHY LOADER
    -------------------------------------------------------------------------- */
 .cinematic-overlay {
   position: fixed;
   inset: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #060608;
-  z-index: 9999;
+  background: radial-gradient(ellipse at 50% 50%, #150205 0%, #0c0103 35%, #050507 75%, #000000 100%);
+  z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   opacity: 1;
-  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cinematic-overlay.fade-out {
   opacity: 0;
-  transform: scale(1.04);
+  transform: scale(1.03);
   pointer-events: none;
 }
 
@@ -615,221 +615,194 @@ a {
   height: 100%;
   z-index: 1;
   pointer-events: none;
+  opacity: 0.65;
 }
 
-.cinematic-pod {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  max-width: 520px;
-  width: 90%;
-  padding: 20px;
-}
-
-/* Outer Cyber Hologram Orbit Rings */
-.portal-ring {
+/* Deep Ambient Red Breathing Halo */
+.cursive-ambient-aura {
   position: absolute;
+  width: 650px;
+  height: 380px;
   border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(229, 9, 20, 0.32) 0%, rgba(255, 42, 75, 0.12) 45%, transparent 72%);
+  filter: blur(48px);
+  z-index: 2;
   pointer-events: none;
+  animation: cursiveAuraBreath 3.2s ease-in-out infinite alternate;
 }
 
-.ring-outer {
-  width: 330px;
-  height: 330px;
-  border: 1px dashed rgba(229, 9, 20, 0.28);
-  animation: rotateClockwise 22s linear infinite;
+@keyframes cursiveAuraBreath {
+  0% { transform: scale(0.88); opacity: 0.45; }
+  100% { transform: scale(1.18); opacity: 0.9; }
 }
 
-.ring-mid {
-  width: 250px;
-  height: 250px;
-  border: 1px solid rgba(229, 9, 20, 0.2);
-  box-shadow: 0 0 35px rgba(229, 9, 20, 0.12);
-  animation: rotateCounter 14s linear infinite;
-}
-
-.ring-inner {
-  width: 190px;
-  height: 190px;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  animation: rotateClockwise 9s linear infinite;
-}
-
-@keyframes rotateClockwise {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes rotateCounter {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
-}
-
-/* Emblem Wrap & Hologram Scanner Core */
-.cinematic-emblem-wrap {
+/* Calligraphy Pod Container */
+.cursive-loader-container {
   position: relative;
-  width: 160px;
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.emblem-core {
-  position: relative;
-  width: 84px;
-  height: 84px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 3;
-}
-
-.cinematic-logo-svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 18px rgba(229, 9, 20, 0.7));
-  animation: floatEmblem 3s ease-in-out infinite;
-}
-
-@keyframes floatEmblem {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-4px) scale(1.03); }
-}
-
-.core-radial-flare {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  background: radial-gradient(circle, rgba(229, 9, 20, 0.5) 0%, rgba(229, 9, 20, 0.1) 45%, transparent 70%);
-  border-radius: 50%;
-  filter: blur(12px);
-  z-index: -1;
-  animation: pulseFlare 2s ease-in-out infinite alternate;
-}
-
-@keyframes pulseFlare {
-  0% { opacity: 0.45; transform: scale(0.9); }
-  100% { opacity: 0.95; transform: scale(1.25); }
-}
-
-/* Circular SVG Progress Ring */
-.progress-ring-svg {
-  position: absolute;
-  inset: 0;
-  transform: rotate(-90deg);
-  z-index: 2;
-}
-
-.progress-ring-bg {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.06);
-  stroke-width: 4;
-}
-
-.progress-ring-stroke {
-  fill: none;
-  stroke: url(#coreFlameGrad);
-  stroke-width: 4.5;
-  stroke-linecap: round;
-  stroke-dasharray: 452.39; /* 2 * PI * 72 */
-  stroke-dashoffset: 452.39;
-  transition: stroke-dashoffset 0.1s linear;
-  filter: drop-shadow(0 0 10px rgba(229, 9, 20, 0.8));
-}
-
-/* Percentage & Status */
-.loader-metrics {
+  z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  justify-content: center;
+  width: 92%;
+  max-width: 860px;
+  padding: 24px;
 }
 
-.percentage-display {
-  font-family: var(--font-mono);
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: #ffffff;
-  margin-bottom: 12px;
-  text-shadow: 0 0 16px rgba(229, 9, 20, 0.4);
-}
-
-.pct-symbol {
-  font-size: 20px;
-  color: var(--red-ember);
-  margin-left: 3px;
-}
-
-/* Cyber Scanning Telemetry Feed */
-.status-stage-wrapper {
+.cursive-svg-wrap {
   position: relative;
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cursive-loading-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: none;
+}
+
+/* Ambient Glow Underlay (Disabled - clean sharp stroke) */
+.cursive-path-glow {
+  display: none;
+}
+
+/* Crisp Clean Red Calligraphy Stroke (No Glow Effect) */
+.cursive-path-main {
+  fill: none;
+  stroke: url(#cursiveRedNeonGrad);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: none;
+  stroke-dasharray: 2600;
+  stroke-dashoffset: 2600;
+  animation: cursiveDrawLoop 2.8s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+
+.cursive-dot {
+  filter: none;
+  animation: cursiveDotFlash 2.8s ease-in-out infinite;
+}
+
+@keyframes cursiveDrawLoop {
+  0% {
+    stroke-dashoffset: 2600;
+    opacity: 0.3;
+  }
+  12% {
+    opacity: 1;
+  }
+  68% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  86% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -2600;
+    opacity: 0;
+  }
+}
+
+@keyframes cursiveDotFlash {
+  0%, 48% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  56%, 86% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+/* Sleek Minimal Progress & Telemetry Pod */
+.cursive-metrics-pod {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: 100%;
   max-width: 440px;
-  padding: 10px 20px;
-  background: rgba(14, 14, 18, 0.85);
-  border: 1px solid rgba(229, 9, 20, 0.3);
-  border-radius: 12px;
-  margin-bottom: 14px;
-  backdrop-filter: blur(12px);
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
-.loader-status-text {
-  font-family: var(--font-mono);
-  font-size: 13px;
+.cursive-percentage {
+  font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 16px rgba(255, 42, 75, 0.85);
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.cursive-pct-symbol {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ff2a4b;
+}
+
+.cursive-progress-track {
+  width: 100%;
+  height: 3.5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+  margin: 10px 0 12px 0;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(229, 9, 20, 0.2);
+}
+
+.cursive-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #8b0000 0%, #e50914 45%, #ff2a4b 80%, #ffffff 100%);
+  border-radius: 99px;
+  box-shadow: 0 0 14px rgba(255, 42, 75, 0.95);
+  transition: width 0.08s linear;
+}
+
+.cursive-status-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
   font-weight: 500;
-  letter-spacing: 0.02em;
-  color: #f4f4f5;
-  transition: opacity 0.18s ease;
+  color: #a1a1aa;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.radar-scan-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 30px;
-  background: linear-gradient(90deg, transparent, rgba(255, 42, 75, 0.45), transparent);
-  animation: scanLine 2s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes scanLine {
-  0% { left: -10%; opacity: 0; }
-  50% { opacity: 1; }
-  100% { left: 105%; opacity: 0; }
-}
-
-.loader-stages-indicator {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.stage-pip {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  transition: all 0.3s ease;
-}
-
-.stage-pip.active {
-  background: var(--red-ember);
-  box-shadow: 0 0 10px var(--red-ember);
-  transform: scale(1.3);
+@media (max-width: 640px) {
+  .cursive-loader-container {
+    width: 95%;
+    padding: 16px 10px;
+  }
+  .cursive-svg-wrap {
+    max-width: 100%;
+  }
+  .cursive-percentage {
+    font-size: 24px;
+  }
+  .cursive-status-text {
+    font-size: 9.5px;
+    letter-spacing: 0.02em;
+    white-space: normal;
+  }
 }
 
 /* --------------------------------------------------------------------------

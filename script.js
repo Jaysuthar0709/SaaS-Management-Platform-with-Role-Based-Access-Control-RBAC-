@@ -913,9 +913,8 @@ function triggerCinematicSequence(admin) {
 }
 
 function executeLoadingTimeline(admin) {
-  const duration = 350; // Ultra-snappy 350ms futuristic transition
+  const duration = 1500; // Smooth elegant cursive drawing & telemetry sync
   const startTime = performance.now();
-  const circumference = 2 * Math.PI * 72;
   const firstName = (admin && admin.name) ? admin.name.split(' ')[0] : 'Admin';
   const roleName = admin?.role || 'Super Admin';
 
@@ -927,18 +926,9 @@ function executeLoadingTimeline(admin) {
     { threshold: 95, text: `◈ [GRANTED] Session Verified. Welcome, ${firstName}`, stageIndex: 4 }
   ];
 
-  const pips = document.querySelectorAll('.stage-pip') || stagePips;
   const pctEl = document.getElementById('loader-percentage') || loaderPercentage;
-  const ringEl = document.getElementById('progress-ring-circle') || progressRingCircle;
+  const progressBarEl = document.getElementById('cursive-progress-bar');
   const statusEl = document.getElementById('loader-status-text') || loaderStatusText;
-
-  function updatePips(activeIndex) {
-    if (pips && pips.forEach) {
-      pips.forEach((pip, idx) => {
-        pip.classList.toggle('active', idx <= activeIndex);
-      });
-    }
-  }
 
   function frame(now) {
     const elapsed = now - startTime;
@@ -950,19 +940,17 @@ function executeLoadingTimeline(admin) {
       pctEl.textContent = pct;
     }
 
-    // Update Circular SVG Ring
-    if (ringEl) {
-      const offset = circumference - (progress * circumference);
-      ringEl.style.strokeDashoffset = offset;
+    // Update Cursive Progress Bar Width
+    if (progressBarEl) {
+      progressBarEl.style.width = `${pct}%`;
     }
 
-    // Update Stage Status Text & Pips
+    // Update Stage Status Text
     for (let i = stages.length - 1; i >= 0; i--) {
       if (pct >= stages[i].threshold) {
         if (statusEl && statusEl.textContent !== stages[i].text) {
           statusEl.textContent = stages[i].text;
         }
-        updatePips(stages[i].stageIndex);
         break;
       }
     }
@@ -970,10 +958,10 @@ function executeLoadingTimeline(admin) {
     if (progress < 1) {
       requestAnimationFrame(frame);
     } else {
-      // 100% Reached: Transition straight into Dashboard
+      // 100% Reached: Smoothly cross-fade into Dashboard
       setTimeout(() => {
         completeCinematicReveal();
-      }, 40);
+      }, 60);
     }
   }
 
@@ -1776,6 +1764,7 @@ function renderClientsTable(filterText = '', serviceFilter = 'all', statusFilter
             <div class="client-avatar-badge">${initials}</div>
             <div>
               <div style="font-weight: 600; color: #ffffff;">${escapeHtml(c.name)}</div>
+              ${c.notes ? `<div style="font-size: 11px; color: #a1a1aa; margin-top: 2px; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(c.notes)}">📝 ${escapeHtml(c.notes)}</div>` : ''}
             </div>
           </div>
         </td>
@@ -2742,6 +2731,17 @@ window.openDetailDrawer = function (type, id) {
         </div>
       </div>
 
+      <!-- ADMIN PURPOSE NOTES -->
+      <div>
+        <div class="drawer-section-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+          Admin Purpose Notes &amp; Scope
+        </div>
+        <div class="drawer-notes-box">
+          ${escapeHtml(c.notes || 'No administrative notes recorded for this client.')}
+        </div>
+      </div>
+
       <!-- GOVERNANCE & SLA TERMS -->
       <div>
         <div class="drawer-section-title">
@@ -3120,6 +3120,7 @@ window.openEditClientModal = function (id) {
   const dueInput = document.getElementById('edit-client-due');
   const projInput = document.getElementById('edit-client-projects');
   const statusInput = document.getElementById('edit-client-status');
+  const notesInput = document.getElementById('edit-client-notes');
   const svcWeb = document.getElementById('edit-client-svc-web');
   const svcGraphic = document.getElementById('edit-client-svc-graphic');
   const svcVideo = document.getElementById('edit-client-svc-video');
@@ -3131,6 +3132,7 @@ window.openEditClientModal = function (id) {
   if (dueInput) dueInput.value = client.paymentDue || 0;
   if (projInput) projInput.value = client.activeProjects || 0;
   if (statusInput) statusInput.value = client.status || 'Active';
+  if (notesInput) notesInput.value = client.notes || '';
 
   const svcs = client.services || [];
   if (svcWeb) svcWeb.checked = svcs.includes('Web Development');
@@ -3413,6 +3415,7 @@ function setupModalHandlers() {
   });
 
   // Form: New Client
+  // Form: New Client (Name, Email, Phone, Services, Admin Notes)
   const formClient = document.getElementById('form-new-client');
   if (formClient) {
     formClient.addEventListener('submit', (e) => {
@@ -3420,33 +3423,47 @@ function setupModalHandlers() {
       const name = document.getElementById('new-client-name').value.trim();
       const email = document.getElementById('new-client-email').value.trim();
       const phone = document.getElementById('new-client-phone').value.trim();
-      const paymentDue = parseInt(document.getElementById('new-client-due').value, 10) || 0;
-      const activeProjects = parseInt(document.getElementById('new-client-projects').value, 10) || 1;
-      const status = document.getElementById('new-client-status').value;
+      const notesEl = document.getElementById('new-client-notes');
+      const notes = notesEl ? notesEl.value.trim() : '';
+      const paymentDue = 0;
+      const activeProjects = 0;
+      const status = 'Active';
 
-      // Read selected services (strictly restricted to Core 3)
+      // Read selected services (Core 3 Services)
       const serviceCheckboxes = document.querySelectorAll('input[name="new-client-service"]:checked');
       const services = Array.from(serviceCheckboxes).map(cb => cb.value);
       if (services.length === 0) {
         services.push('Web Development');
       }
 
-      const newId = `CLT-${100 + MockDataStore.clients.length + 1}`;
+      let maxCltNum = 100;
+      (MockDataStore.clients || []).forEach(c => {
+        if (c && c.id) {
+          const match = String(c.id).match(/CLT-(\d+)/i);
+          if (match) {
+            const n = parseInt(match[1], 10);
+            if (n > maxCltNum) maxCltNum = n;
+          }
+        }
+      });
+      const newId = `CLT-${maxCltNum + 1}`;
+
       const newClient = {
         id: newId,
         name,
         email,
         phone,
         services,
+        notes,
         activeProjects,
-        totalBilled: 35000,
+        totalBilled: 0,
         paymentDue,
         status
       };
+      if (!MockDataStore.clients) MockDataStore.clients = [];
       MockDataStore.clients.unshift(newClient);
 
       MockDataStore.kpis.clients += 1;
-      MockDataStore.kpis.clientPending += paymentDue;
       const badgeClients = document.getElementById('badge-total-clients');
       if (badgeClients) badgeClients.textContent = MockDataStore.clients.length;
 
@@ -3455,7 +3472,7 @@ function setupModalHandlers() {
       renderAllViews();
       closeModal('modal-new-client');
       formClient.reset();
-      showToast(`Enterprise client "${name}" (${newId}) onboarded successfully`, 'success');
+      showToast(`Enterprise client "${name}" (${newId}) onboarded successfully & synced to Google Sheet!`, 'success');
     });
   }
 
@@ -3475,6 +3492,11 @@ function setupModalHandlers() {
       client.activeProjects = parseInt(document.getElementById('edit-client-projects').value, 10) || 0;
       client.status = document.getElementById('edit-client-status').value;
 
+      const notesInput = document.getElementById('edit-client-notes');
+      if (notesInput) {
+        client.notes = notesInput.value.trim();
+      }
+
       const services = [];
       if (document.getElementById('edit-client-svc-web').checked) services.push('Web Development');
       if (document.getElementById('edit-client-svc-graphic').checked) services.push('Graphic Design');
@@ -3486,7 +3508,7 @@ function setupModalHandlers() {
       GoogleSheetsSync.upsertClient(client);
       renderAllViews();
       closeModal('modal-edit-client');
-      showToast(`Client account ${client.id} updated successfully`, 'success');
+      showToast(`Client account ${client.id} updated & synced to Google Sheet`, 'success');
     });
   }
 

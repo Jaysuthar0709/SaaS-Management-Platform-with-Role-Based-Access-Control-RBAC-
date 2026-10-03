@@ -203,7 +203,7 @@ function setupClientsSheet(sheet, listsSheet) {
   sheet.clear();
   var headers = [
     "Client ID", "Client Name / Company", "Contact Email", "Phone", "Services Engaged",
-    "Active Projects Count", "Total Billed (\u20B9)", "Pending Payment (\u20B9)", "Relationship Status"
+    "Active Projects Count", "Total Billed (\u20B9)", "Pending Payment (\u20B9)", "Relationship Status", "Admin Notes"
   ];
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
   formatHeaderRow(sheet, 1, headers.length, "#78350f", "#ffffff");
@@ -430,7 +430,8 @@ function readClientsSheet(sheet) {
       activeProjects: Number(row[5]) || 0,
       totalBilled: Number(row[6]) || 0,
       paymentDue: Number(row[7]) || 0,
-      status: String(row[8] || "Active")
+      status: String(row[8] || "Active"),
+      notes: String(row[9] || "")
     });
   }
   return list;
@@ -660,7 +661,8 @@ function doPost(e) {
       var servicesStr = Array.isArray(c.services) ? c.services.join(", ") : (c.services || c.service || "Web Development");
       var rowData = [
         c.id, c.name, c.email, c.phone || "", servicesStr,
-        Number(c.activeProjects) || 0, Number(c.totalBilled) || 0, Number(c.paymentDue) || 0, c.status || "Active"
+        Number(c.activeProjects) || 0, Number(c.totalBilled) || 0, Number(c.paymentDue) || 0, c.status || "Active",
+        c.notes || ""
       ];
       upsertRow(clientSheet, 1, c.id, rowData);
       result.id = c.id;

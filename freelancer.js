@@ -597,9 +597,8 @@ function triggerFlCinematicSequence(fl) {
 }
 
 function executeFlLoadingTimeline(fl) {
-  const duration = 350; // Ultra-snappy 350ms transition
+  const duration = 1500; // Smooth elegant cursive drawing & telemetry sync
   const startTime = performance.now();
-  const circumference = 2 * Math.PI * 72;
   const firstName = (fl && fl.name) ? fl.name.split(' ')[0] : 'Specialist';
 
   const stages = [
@@ -610,25 +609,23 @@ function executeFlLoadingTimeline(fl) {
     { threshold: 95, text: `◈ [GRANTED] Session Verified. Welcome, ${firstName}`, stageIndex: 4 }
   ];
 
-  const pips = document.querySelectorAll('.stage-pip');
+  const pctEl = document.getElementById('fl-loader-percentage');
+  const progressBarEl = document.getElementById('fl-cursive-progress-bar');
+  const statusEl = document.getElementById('fl-loader-status-text');
 
   function frame(now) {
     const elapsed = now - startTime;
     const progress = Math.min(elapsed / duration, 1);
     const pct = Math.floor(progress * 100);
 
-    if (flLoaderPercentage) flLoaderPercentage.textContent = pct;
-    if (flProgressRingCircle) {
-      const offset = circumference - (progress * circumference);
-      flProgressRingCircle.style.strokeDashoffset = offset;
-    }
+    if (pctEl) pctEl.textContent = pct;
+    if (progressBarEl) progressBarEl.style.width = `${pct}%`;
 
     for (let i = stages.length - 1; i >= 0; i--) {
       if (pct >= stages[i].threshold) {
-        if (flLoaderStatusText && flLoaderStatusText.textContent !== stages[i].text) {
-          flLoaderStatusText.textContent = stages[i].text;
+        if (statusEl && statusEl.textContent !== stages[i].text) {
+          statusEl.textContent = stages[i].text;
         }
-        pips.forEach((p, idx) => p.classList.toggle('active', idx <= stages[i].stageIndex));
         break;
       }
     }
@@ -636,7 +633,7 @@ function executeFlLoadingTimeline(fl) {
     if (progress < 1) {
       requestAnimationFrame(frame);
     } else {
-      setTimeout(() => completeFlCinematicReveal(), 40);
+      setTimeout(() => completeFlCinematicReveal(), 60);
     }
   }
 
