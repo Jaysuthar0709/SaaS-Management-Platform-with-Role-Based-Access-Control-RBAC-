@@ -813,6 +813,77 @@
     </div>
   </div>
 
+  <!-- Google Pay Style Project Completion Celebration Modal -->
+  <div id="modal-project-complete-celebration" class="gpay-celebration-backdrop hidden" aria-hidden="true">
+    <div class="gpay-celebration-card">
+      <button class="gpay-close-btn" onclick="closeProjectCelebrationModal()" aria-label="Close celebration modal">&times;</button>
+      
+      <!-- Ambient Glow & Animated Particle Burst -->
+      <div class="gpay-glow-bg"></div>
+      <div class="gpay-particles-wrap" id="gpay-particles-container">
+        <span class="gpay-particle p1"></span>
+        <span class="gpay-particle p2"></span>
+        <span class="gpay-particle p3"></span>
+        <span class="gpay-particle p4"></span>
+        <span class="gpay-particle p5"></span>
+        <span class="gpay-particle p6"></span>
+        <span class="gpay-particle p7"></span>
+        <span class="gpay-particle p8"></span>
+      </div>
+
+      <!-- Concentric Ripples -->
+      <div class="gpay-ripple-container">
+        <div class="gpay-ripple r1"></div>
+        <div class="gpay-ripple r2"></div>
+        <div class="gpay-ripple r3"></div>
+        
+        <!-- Central Popping Green Circle with Animated Draw Checkmark -->
+        <div class="gpay-green-circle" id="gpay-main-circle">
+          <svg class="gpay-checkmark-svg" viewBox="0 0 52 52">
+            <circle class="gpay-checkmark-circle" cx="26" cy="26" r="24" fill="none"/>
+            <path class="gpay-checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Celebration Content -->
+      <div class="gpay-celebration-content">
+        <div class="gpay-success-badge">
+          <span class="gpay-badge-dot"></span>
+          <span>SPECIALIST DELIVERABLE COMPLETED</span>
+        </div>
+        <h3 class="gpay-project-title" id="gpay-proj-title">Project Name</h3>
+        <p class="gpay-project-meta" id="gpay-proj-meta">PRJ-301 &bull; Web Development</p>
+        
+        <div class="gpay-status-pill-wrap">
+          <div class="gpay-metric-item">
+            <span class="gpay-metric-label">Sprint Velocity</span>
+            <span class="gpay-metric-val font-mono text-green">100% Complete</span>
+          </div>
+          <div class="gpay-metric-sep"></div>
+          <div class="gpay-metric-item">
+            <span class="gpay-metric-label">Status</span>
+            <span class="gpay-metric-val font-mono" style="color: #60a5fa;">Completed</span>
+          </div>
+          <div class="gpay-metric-sep"></div>
+          <div class="gpay-metric-item">
+            <span class="gpay-metric-label">Cloud Sync</span>
+            <span class="gpay-metric-val font-mono text-green">✓ Live Synced</span>
+          </div>
+        </div>
+
+        <p class="gpay-subtext" id="gpay-proj-subtext">All milestones and deliverables have been marked completed and updated live on the platform.</p>
+
+        <div class="gpay-actions">
+          <button type="button" class="gpay-done-btn" onclick="closeProjectCelebrationModal()">
+            <span>Done</span>
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Freelancer Portal Script -->
   <script src="freelancer.js"></script>
 </body>

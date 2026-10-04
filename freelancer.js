@@ -861,13 +861,22 @@ function renderAssignedProjects() {
             </div>
           </div>
 
-          <!-- Notes -->
-          <div class="fl-proj-notes">
-            <strong>Sprint Note:</strong> ${escapeHtml(proj.notes || 'Awaiting sprint update notes.')}
+          <!-- Project Notes & Added Information (Admin Added - Read Only for Freelancer) -->
+          <div class="fl-admin-notes-card">
+            <div class="fl-notes-header">
+              <span class="fl-notes-badge">ADMIN PROJECT NOTES (READ-ONLY)</span>
+            </div>
+            <div class="fl-notes-body">${escapeHtml(proj.notes || 'No project notes or scope details added by Admin yet.')}</div>
           </div>
         </div>
 
         <div class="fl-card-actions">
+          <button type="button" class="fl-btn-mark-complete ${proj.status === 'Completed' ? 'is-completed' : ''}" onclick="markFreelancerProjectComplete('${escapeHtml(proj.id)}')">
+            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span>${proj.status === 'Completed' ? 'Completed ✓' : 'Mark Complete'}</span>
+          </button>
           <button type="button" class="fl-btn-submit-work" onclick="openDeliverableModal('${escapeHtml(proj.id)}')">
             <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
               <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
@@ -883,6 +892,120 @@ function renderAssignedProjects() {
   }).join('');
 }
 
+/* ----------------------------------------------------------------------------
+ * Google Pay Style Project Completion Celebration & Sound (Freelancer Portal)
+ * ---------------------------------------------------------------------------- */
+function playGooglePaySuccessChime() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    
+    // Play 3 rapid ascending sweet bell harmonic notes (C6, E6, G6)
+    const notes = [1046.50, 1318.51, 1567.98];
+    const times = [0, 0.09, 0.18];
+    
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + times[idx]);
+      
+      gain.gain.setValueAtTime(0.001, ctx.currentTime + times[idx]);
+      gain.gain.exponentialRampToValueAtTime(0.24, ctx.currentTime + times[idx] + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + times[idx] + 0.5);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(ctx.currentTime + times[idx]);
+      osc.stop(ctx.currentTime + times[idx] + 0.55);
+    });
+  } catch (err) {
+    // Audio synthesis fallback
+  }
+}
+window.playGooglePaySuccessChime = playGooglePaySuccessChime;
+
+function showProjectCompleteCelebration(project) {
+  if (!project) return;
+  
+  const modal = document.getElementById('modal-project-complete-celebration');
+  const titleEl = document.getElementById('gpay-proj-title');
+  const metaEl = document.getElementById('gpay-proj-meta');
+  const subtextEl = document.getElementById('gpay-proj-subtext');
+  
+  if (titleEl) titleEl.textContent = project.name || 'Enterprise Project';
+  if (metaEl) metaEl.innerHTML = `<span class="font-mono">${escapeHtml(project.id)}</span> &bull; ${escapeHtml(project.service || 'Web Development')} &bull; Client: <strong>${escapeHtml(project.client || 'Enterprise Client')}</strong>`;
+  if (subtextEl) {
+    subtextEl.textContent = `Project ${project.id} is 100% Completed and deliverables are saved & synchronized live to cloud.`;
+  }
+  
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    
+    playGooglePaySuccessChime();
+    
+    // Re-trigger CSS animations on circle & checkmark
+    const circle = modal.querySelector('.gpay-green-circle');
+    if (circle) {
+      circle.style.animation = 'none';
+      circle.offsetHeight; // reflow
+      circle.style.animation = '';
+    }
+    const checkPath = modal.querySelector('.gpay-checkmark-check');
+    if (checkPath) {
+      checkPath.style.animation = 'none';
+      checkPath.offsetHeight; // reflow
+      checkPath.style.animation = '';
+    }
+    const circleRing = modal.querySelector('.gpay-checkmark-circle');
+    if (circleRing) {
+      circleRing.style.animation = 'none';
+      circleRing.offsetHeight; // reflow
+      circleRing.style.animation = '';
+    }
+  }
+}
+window.showProjectCompleteCelebration = showProjectCompleteCelebration;
+
+function closeProjectCelebrationModal() {
+  const modal = document.getElementById('modal-project-complete-celebration');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+window.closeProjectCelebrationModal = closeProjectCelebrationModal;
+
+function markFreelancerProjectComplete(projectId) {
+  const proj = (MockDataStore.projects || []).find(p => p.id === projectId);
+  if (!proj) return;
+
+  proj.progress = 100;
+  proj.status = 'Completed';
+
+  StorageManager.save();
+  GoogleSheetsSync.upsertProject(proj);
+  renderAssignedProjects();
+  showProjectCompleteCelebration(proj);
+  showToast(`Sprint milestone for "${proj.name}" marked as 100% Completed!`, 'success');
+}
+window.markFreelancerProjectComplete = markFreelancerProjectComplete;
+
+// Backdrop dismiss for celebration modal
+document.addEventListener('click', (e) => {
+  const gpayModal = document.getElementById('modal-project-complete-celebration');
+  if (gpayModal && e.target === gpayModal) {
+    closeProjectCelebrationModal();
+  }
+});
+
 function saveProjectProgress(projectId) {
   const slider = document.getElementById(`slider-${projectId}`);
   if (!slider) return;
@@ -891,11 +1014,16 @@ function saveProjectProgress(projectId) {
   const proj = (MockDataStore.projects || []).find(p => p.id === projectId);
   if (proj) {
     proj.progress = newProg;
-    if (newProg >= 100 && proj.status !== 'Completed') {
+    if (newProg >= 100) {
+      proj.status = 'Completed';
+    } else if (newProg > 0 && proj.status === 'Completed') {
       proj.status = 'In Review';
     }
     StorageManager.save();
     GoogleSheetsSync.upsertProject(proj);
+    if (newProg >= 100) {
+      showProjectCompleteCelebration(proj);
+    }
     showToast(`Progress for ${proj.name} saved at ${newProg}% and synced to cloud`, 'success');
   }
 }
@@ -946,6 +1074,10 @@ if (formDeliverable) {
       renderAssignedProjects();
       closeFlModal('modal-submit-deliverable');
       formDeliverable.reset();
+      
+      if (prog >= 100 || status === 'Completed') {
+        showProjectCompleteCelebration(proj);
+      }
       showToast(`Deliverables submitted for ${proj.name}. Progress: ${prog}%`, 'success');
     }
   });

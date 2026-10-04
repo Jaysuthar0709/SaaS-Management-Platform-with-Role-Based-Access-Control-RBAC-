@@ -897,7 +897,7 @@
         <div class="page-header-row">
           <div>
             <h2 class="page-title">Enterprise Project Portfolio</h2>
-            <p class="page-subtitle">Track deliverables, budgets, client milestones, and assigned engineering squads.</p>
+            <p class="page-subtitle">Track deliverables, active sprint milestones, and completed project archives.</p>
           </div>
           <div class="page-header-actions">
             <button class="btn-primary-red-sm" id="btn-open-project-modal">
@@ -905,6 +905,22 @@
                 <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
               </svg>
               Create New Project
+            </button>
+          </div>
+        </div>
+
+        <!-- Project Sub-Tabs: Active Projects & Completed Projects Archive -->
+        <div class="payment-subtab-container" style="margin-bottom: 16px;">
+          <div class="payment-subtab-group">
+            <button type="button" class="payment-subtab-btn active" id="subtab-btn-active-projects" onclick="switchProjectSubTab('active')">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.527.82-1.17 2.05-1.583 3.377a16.89 16.89 0 00-.77 3.518c-.068.513-.105 1.03-.112 1.547a8.55 8.55 0 01-1.393-.815 1 1 0 00-1.407.283c-.22.34-.148.793.167 1.05 1.077.876 2.378 1.48 3.785 1.767a1.002 1.002 0 001.19-.785 17.5 17.5 0 00.177-2.617c.36-2.122 1.07-4.14 2.112-5.94.343-.594.135-1.353-.464-1.696a1 1 0 00-.43-.109z" clip-rule="evenodd"/></svg>
+              <span>Active Sprints</span>
+              <span class="badge-count" id="badge-subtab-active-projects">0</span>
+            </button>
+            <button type="button" class="payment-subtab-btn" id="subtab-btn-completed-projects" onclick="switchProjectSubTab('completed')">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              <span>Completed Projects Archive</span>
+              <span class="badge-count" id="badge-subtab-completed-projects" style="color: #34d399; border-color: rgba(16,185,129,0.3);">0</span>
             </button>
           </div>
         </div>
@@ -928,14 +944,13 @@
               <option value="all">All Statuses</option>
               <option value="Active">Active</option>
               <option value="In Review">In Review</option>
-              <option value="Completed">Completed</option>
               <option value="Planning">Planning</option>
             </select>
           </div>
         </div>
 
-        <!-- Projects Full Table -->
-        <div class="table-card">
+        <!-- 1. Active Projects Full Table -->
+        <div class="table-card" id="card-active-projects-table">
           <div class="table-responsive">
             <table class="data-table">
               <thead>
@@ -954,6 +969,29 @@
               </thead>
               <tbody id="projects-table-body">
                 <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 2. Completed Projects Archive Table -->
+        <div class="table-card hidden" id="card-completed-projects-table">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Project ID</th>
+                  <th>Delivered Project (Service)</th>
+                  <th>Client</th>
+                  <th>Budget (₹)</th>
+                  <th>Assigned Specialist</th>
+                  <th>Completion Date</th>
+                  <th>Delivery Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="completed-projects-table-body">
+                <!-- Dynamically rendered from Completed Projects -->
               </tbody>
             </table>
           </div>
@@ -1472,7 +1510,7 @@
 
   <!-- Modal: New Project -->
   <div id="modal-new-project" class="modal-backdrop hidden" aria-hidden="true">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 600px;">
       <div class="modal-header">
         <div class="modal-title-wrap">
           <span class="modal-badge">PROJECT CREATION</span>
@@ -1482,12 +1520,15 @@
       </div>
       <form id="form-new-project" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
         <div class="form-grid-2">
+          <!-- 1. Project Name -->
           <div class="form-group">
-            <label class="form-label">Project Name</label>
+            <label class="form-label" for="new-proj-title">Project Name</label>
             <input type="text" id="new-proj-title" class="form-control" placeholder="e.g. NextGen Cloud Platform" required>
           </div>
+
+          <!-- 2. Service Type -->
           <div class="form-group">
-            <label class="form-label">Service Type (Core 3)</label>
+            <label class="form-label" for="new-proj-service">Service Type</label>
             <select id="new-proj-service" class="form-control" required>
               <option value="Web Development">Web Development</option>
               <option value="Graphic Design">Graphic Design</option>
@@ -1495,36 +1536,60 @@
             </select>
           </div>
         </div>
+
         <div class="form-grid-2">
+          <!-- 3. Client Name (Google Sheets Dropdown with Search) -->
           <div class="form-group">
-            <label class="form-label">Client Name</label>
-            <input type="text" id="new-proj-client" class="form-control" placeholder="e.g. Nexus Global Tech" required>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+              <label class="form-label" for="new-proj-client-search" style="margin-bottom: 0;">Client Name</label>
+              <span style="font-size: 10.5px; color: var(--red-ember);">Google Sheet Dropdown &bull; Search</span>
+            </div>
+            <div class="searchable-select-wrap" id="wrap-new-proj-client">
+              <input type="hidden" id="new-proj-client" required>
+              <div class="searchable-input-group">
+                <input type="text" id="new-proj-client-search" class="form-control" placeholder="Search or select client..." autocomplete="off" required>
+                <button type="button" class="searchable-toggle-btn" id="btn-toggle-new-proj-client" aria-label="Toggle client list" tabindex="-1">
+                  <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </button>
+              </div>
+              <div class="searchable-dropdown-menu" id="menu-new-proj-client">
+                <!-- Dynamically populated from Google Sheets / Clients DB -->
+              </div>
+            </div>
           </div>
+
+          <!-- 4. Assign Freelancer (Database Dropdown with Search) -->
           <div class="form-group">
-            <label class="form-label">Total Budget (₹ INR)</label>
-            <input type="number" id="new-proj-budget" class="form-control" placeholder="150000" min="1000" required>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+              <label class="form-label" for="new-proj-freelancer-search" style="margin-bottom: 0;">Assign Freelancer</label>
+              <span style="font-size: 10.5px; color: var(--text-muted);">Database Search</span>
+            </div>
+            <div class="searchable-select-wrap" id="wrap-new-proj-freelancer">
+              <input type="hidden" id="new-proj-freelancer">
+              <div class="searchable-input-group">
+                <input type="text" id="new-proj-freelancer-search" class="form-control" placeholder="Search or assign freelancer..." autocomplete="off">
+                <button type="button" class="searchable-toggle-btn" id="btn-toggle-new-proj-freelancer" aria-label="Toggle freelancer list" tabindex="-1">
+                  <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </button>
+              </div>
+              <div class="searchable-dropdown-menu" id="menu-new-proj-freelancer">
+                <!-- Dynamically populated from Database -->
+              </div>
+            </div>
           </div>
         </div>
+
         <div class="form-grid-2">
+          <!-- 5. Delivery Deadline -->
           <div class="form-group">
-            <label class="form-label">Assign Freelancer</label>
-            <select id="new-proj-freelancer" class="form-control">
-              <!-- Populated dynamically -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Delivery Deadline</label>
+            <label class="form-label" for="new-proj-deadline">Delivery Deadline</label>
             <input type="date" id="new-proj-deadline" class="form-control" required>
           </div>
-        </div>
-        <div class="form-grid-2">
+
+          <!-- 6. Project Status -->
           <div class="form-group">
-            <label class="form-label">Initial Progress (%)</label>
-            <input type="number" id="new-proj-progress" class="form-control" min="0" max="100" value="15" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Project Status</label>
-            <select id="new-proj-status" class="form-control">
+            <label class="form-label" for="new-proj-status">Project Status</label>
+            <select id="new-proj-status" class="form-control" required>
               <option value="Active">Active</option>
               <option value="Planning">Planning</option>
               <option value="In Review">In Review</option>
@@ -1532,13 +1597,23 @@
             </select>
           </div>
         </div>
+
+        <!-- 7. Project Notes & Added Information -->
         <div class="form-group">
-          <label class="form-label">Project Notes &amp; Added Information</label>
-          <textarea id="new-proj-notes" class="form-control" style="height: 65px; padding: 10px;" placeholder="Add milestone deliverables, repository links, or client instructions..."></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <label class="form-label" for="new-proj-notes" style="margin-bottom: 0;">Project Notes &amp; Added Information</label>
+            <span style="font-size: 11px; color: var(--red-ember); font-weight: 500;">Admin Edit &bull; Freelancer Read-Only</span>
+          </div>
+          <textarea id="new-proj-notes" class="form-control" style="height: 75px; padding: 10px;" placeholder="Add project instructions, deliverables, specifications, repository links, or milestones..."></textarea>
         </div>
+
+        <!-- Internal budget tracker defaults -->
+        <input type="hidden" id="new-proj-budget" value="50000">
+        <input type="hidden" id="new-proj-progress" value="0">
+
         <div class="modal-footer">
           <button type="button" class="btn-secondary" data-close-modal="modal-new-project">Cancel</button>
-          <button type="submit" class="btn-primary-red-sm">Initialize Project</button>
+          <button type="submit" class="btn-primary-red-sm">Create New Project</button>
         </div>
       </form>
     </div>
@@ -1546,7 +1621,7 @@
 
   <!-- Modal: Edit Project -->
   <div id="modal-edit-project" class="modal-backdrop hidden" aria-hidden="true">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 600px;">
       <div class="modal-header">
         <div class="modal-title-wrap">
           <span class="modal-badge">PROJECT MODIFICATIONS</span>
@@ -1557,12 +1632,15 @@
       <form id="form-edit-project" class="modal-form" action="javascript:void(0);" onsubmit="return false;">
         <input type="hidden" id="edit-proj-id">
         <div class="form-grid-2">
+          <!-- 1. Project Name -->
           <div class="form-group">
-            <label class="form-label">Project Name</label>
+            <label class="form-label" for="edit-proj-title">Project Name</label>
             <input type="text" id="edit-proj-title" class="form-control" required>
           </div>
+
+          <!-- 2. Service Type -->
           <div class="form-group">
-            <label class="form-label">Service Type</label>
+            <label class="form-label" for="edit-proj-service">Service Type</label>
             <select id="edit-proj-service" class="form-control" required>
               <option value="Web Development">Web Development</option>
               <option value="Graphic Design">Graphic Design</option>
@@ -1570,36 +1648,60 @@
             </select>
           </div>
         </div>
+
         <div class="form-grid-2">
+          <!-- 3. Client Name (Searchable Dropdown) -->
           <div class="form-group">
-            <label class="form-label">Client Name</label>
-            <input type="text" id="edit-proj-client" class="form-control" required>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+              <label class="form-label" for="edit-proj-client-search" style="margin-bottom: 0;">Client Name</label>
+              <span style="font-size: 10.5px; color: var(--red-ember);">Google Sheet Dropdown &bull; Search</span>
+            </div>
+            <div class="searchable-select-wrap" id="wrap-edit-proj-client">
+              <input type="hidden" id="edit-proj-client" required>
+              <div class="searchable-input-group">
+                <input type="text" id="edit-proj-client-search" class="form-control" placeholder="Search or select client..." autocomplete="off" required>
+                <button type="button" class="searchable-toggle-btn" id="btn-toggle-edit-proj-client" aria-label="Toggle client list" tabindex="-1">
+                  <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </button>
+              </div>
+              <div class="searchable-dropdown-menu" id="menu-edit-proj-client">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
           </div>
+
+          <!-- 4. Assign Freelancer (Searchable Dropdown) -->
           <div class="form-group">
-            <label class="form-label">Budget (₹ INR)</label>
-            <input type="number" id="edit-proj-budget" class="form-control" min="1000" required>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+              <label class="form-label" for="edit-proj-freelancer-search" style="margin-bottom: 0;">Assign Freelancer</label>
+              <span style="font-size: 10.5px; color: var(--text-muted);">Database Search</span>
+            </div>
+            <div class="searchable-select-wrap" id="wrap-edit-proj-freelancer">
+              <input type="hidden" id="edit-proj-freelancer">
+              <div class="searchable-input-group">
+                <input type="text" id="edit-proj-freelancer-search" class="form-control" placeholder="Search or assign freelancer..." autocomplete="off">
+                <button type="button" class="searchable-toggle-btn" id="btn-toggle-edit-proj-freelancer" aria-label="Toggle freelancer list" tabindex="-1">
+                  <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </button>
+              </div>
+              <div class="searchable-dropdown-menu" id="menu-edit-proj-freelancer">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
           </div>
         </div>
+
         <div class="form-grid-2">
+          <!-- 5. Delivery Deadline -->
           <div class="form-group">
-            <label class="form-label">Assigned Freelancer</label>
-            <select id="edit-proj-freelancer" class="form-control">
-              <!-- Populated dynamically -->
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Deadline</label>
+            <label class="form-label" for="edit-proj-deadline">Delivery Deadline</label>
             <input type="date" id="edit-proj-deadline" class="form-control" required>
           </div>
-        </div>
-        <div class="form-grid-2">
+
+          <!-- 6. Project Status -->
           <div class="form-group">
-            <label class="form-label">Progress (%)</label>
-            <input type="number" id="edit-proj-progress" class="form-control" min="0" max="100" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Project Status</label>
-            <select id="edit-proj-status" class="form-control">
+            <label class="form-label" for="edit-proj-status">Project Status</label>
+            <select id="edit-proj-status" class="form-control" required>
               <option value="Active">Active</option>
               <option value="Planning">Planning</option>
               <option value="In Review">In Review</option>
@@ -1607,10 +1709,27 @@
             </select>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Project Notes &amp; Scope Details</label>
-          <textarea id="edit-proj-notes" class="form-control" style="height: 65px; padding: 10px;"></textarea>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="edit-proj-progress">Progress (%)</label>
+            <input type="number" id="edit-proj-progress" class="form-control" min="0" max="100" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-proj-budget">Budget (&pound; INR)</label>
+            <input type="number" id="edit-proj-budget" class="form-control" min="0" required>
+          </div>
         </div>
+
+        <!-- 7. Project Notes & Added Information -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <label class="form-label" for="edit-proj-notes" style="margin-bottom: 0;">Project Notes &amp; Added Information</label>
+            <span style="font-size: 11px; color: var(--red-ember); font-weight: 500;">Admin Edit &bull; Freelancer Read-Only</span>
+          </div>
+          <textarea id="edit-proj-notes" class="form-control" style="height: 75px; padding: 10px;" placeholder="Add project instructions, deliverables, specifications, repository links, or milestones..."></textarea>
+        </div>
+
         <div class="modal-footer">
           <button type="button" class="btn-secondary" data-close-modal="modal-edit-project">Cancel</button>
           <button type="submit" class="btn-primary-red-sm">Save Project Updates</button>
@@ -2247,6 +2366,77 @@
         <div class="modal-footer" style="padding: 0;">
           <button type="button" class="btn-secondary" data-close-modal="modal-delete-confirm">Cancel</button>
           <button type="button" class="btn-primary-red-sm" id="btn-confirm-delete-action">Delete Record</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Pay Style Project Completion Celebration Modal -->
+  <div id="modal-project-complete-celebration" class="gpay-celebration-backdrop hidden" aria-hidden="true">
+    <div class="gpay-celebration-card">
+      <button class="gpay-close-btn" onclick="closeProjectCelebrationModal()" aria-label="Close celebration modal">&times;</button>
+      
+      <!-- Ambient Glow & Animated Particle Burst -->
+      <div class="gpay-glow-bg"></div>
+      <div class="gpay-particles-wrap" id="gpay-particles-container">
+        <span class="gpay-particle p1"></span>
+        <span class="gpay-particle p2"></span>
+        <span class="gpay-particle p3"></span>
+        <span class="gpay-particle p4"></span>
+        <span class="gpay-particle p5"></span>
+        <span class="gpay-particle p6"></span>
+        <span class="gpay-particle p7"></span>
+        <span class="gpay-particle p8"></span>
+      </div>
+
+      <!-- Concentric Ripples -->
+      <div class="gpay-ripple-container">
+        <div class="gpay-ripple r1"></div>
+        <div class="gpay-ripple r2"></div>
+        <div class="gpay-ripple r3"></div>
+        
+        <!-- Central Popping Green Circle with Animated Draw Checkmark -->
+        <div class="gpay-green-circle" id="gpay-main-circle">
+          <svg class="gpay-checkmark-svg" viewBox="0 0 52 52">
+            <circle class="gpay-checkmark-circle" cx="26" cy="26" r="24" fill="none"/>
+            <path class="gpay-checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Celebration Content -->
+      <div class="gpay-celebration-content">
+        <div class="gpay-success-badge">
+          <span class="gpay-badge-dot"></span>
+          <span>PROJECT COMPLETED SUCCESSFULLY</span>
+        </div>
+        <h3 class="gpay-project-title" id="gpay-proj-title">Project Name</h3>
+        <p class="gpay-project-meta" id="gpay-proj-meta">PRJ-301 &bull; Web Development</p>
+        
+        <div class="gpay-status-pill-wrap">
+          <div class="gpay-metric-item">
+            <span class="gpay-metric-label">Progress</span>
+            <span class="gpay-metric-val font-mono text-green">100% Final</span>
+          </div>
+          <div class="gpay-metric-sep"></div>
+          <div class="gpay-metric-item">
+            <span class="gpay-metric-label">Status</span>
+            <span class="gpay-metric-val font-mono" style="color: #60a5fa;">Completed</span>
+          </div>
+          <div class="gpay-metric-sep"></div>
+          <div class="gpay-metric-item">
+            <span class="gpay-metric-label">Cloud Sync</span>
+            <span class="gpay-metric-val font-mono text-green">✓ Google Sheet</span>
+          </div>
+        </div>
+
+        <p class="gpay-subtext" id="gpay-proj-subtext">All sprint deliverables, milestones, and scope specifications have been marked completed and synced live.</p>
+
+        <div class="gpay-actions">
+          <button type="button" class="gpay-done-btn" onclick="closeProjectCelebrationModal()">
+            <span>Done</span>
+            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+          </button>
         </div>
       </div>
     </div>

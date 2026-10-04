@@ -2901,6 +2901,24 @@ a {
   color: #ffffff;
 }
 
+.action-icon-btn.complete {
+  color: #71717a;
+}
+
+.action-icon-btn.complete:hover {
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.12);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+.action-icon-btn.complete.is-completed {
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.15);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+}
+
 .action-icon-btn.view:hover {
   color: #60a5fa;
   border-color: rgba(96, 165, 250, 0.4);
@@ -3868,4 +3886,492 @@ a {
   display: inline-block;
   flex-shrink: 0;
 }
+
+/* --------------------------------------------------------------------------
+   16. SEARCHABLE DROPDOWN / COMBOBOX COMPONENT
+   -------------------------------------------------------------------------- */
+.searchable-select-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.searchable-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.searchable-input-group input.form-control {
+  padding-right: 36px;
+  cursor: text;
+}
+
+.searchable-input-group .searchable-toggle-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #71717a;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.searchable-input-group .searchable-toggle-btn:hover {
+  color: #ffffff;
+}
+
+.searchable-select-wrap.open .searchable-toggle-btn svg {
+  transform: rotate(180deg);
+}
+
+.searchable-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #14141a;
+  border: 1px solid rgba(229, 9, 20, 0.35);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85);
+  max-height: 230px;
+  overflow-y: auto;
+  z-index: 1050;
+  display: none;
+  flex-direction: column;
+  padding: 5px;
+  backdrop-filter: blur(12px);
+}
+
+.searchable-select-wrap.open .searchable-dropdown-menu {
+  display: flex;
+}
+
+.searchable-option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-size: 13px;
+  color: #e4e4e7;
+  gap: 8px;
+}
+
+.searchable-option-item:hover,
+.searchable-option-item.highlighted {
+  background: rgba(229, 9, 20, 0.15);
+  color: #ffffff;
+}
+
+.searchable-option-item.selected {
+  background: rgba(229, 9, 20, 0.25);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.searchable-option-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.searchable-option-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(229, 9, 20, 0.2);
+  color: #ff2a4b;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.searchable-option-title {
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchable-option-subtitle {
+  font-size: 11px;
+  color: #71717a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchable-empty-item {
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: #71717a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.searchable-add-quick-btn {
+  font-size: 11.5px;
+  color: #ff2a4b;
+  background: transparent;
+  border: 1px dashed rgba(229, 9, 20, 0.4);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 6px;
+  width: 100%;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.searchable-add-quick-btn:hover {
+  background: rgba(229, 9, 20, 0.12);
+  border-color: #ff2a4b;
+}
+
+/* --------------------------------------------------------------------------
+   16. GOOGLE PAY STYLE PROJECT COMPLETION CELEBRATION POPUP
+   -------------------------------------------------------------------------- */
+.gpay-celebration-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 4, 8, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 1;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gpay-celebration-backdrop.hidden {
+  opacity: 0;
+  pointer-events: none;
+  display: none !important;
+}
+
+.gpay-celebration-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: linear-gradient(180deg, #181824 0%, #0e0e14 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 24px;
+  padding: 38px 28px 28px;
+  text-align: center;
+  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.85), 0 0 45px rgba(16, 185, 129, 0.2);
+  overflow: hidden;
+  animation: gpayCardSlideUp 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes gpayCardSlideUp {
+  0% { transform: scale(0.82) translateY(28px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.gpay-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 20px;
+  color: #a1a1aa;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.gpay-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.gpay-glow-bg {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.32) 0%, rgba(16, 185, 129, 0) 70%);
+  pointer-events: none;
+}
+
+/* Concentric Expanding Ripple Waves */
+.gpay-ripple-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gpay-ripple {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(16, 185, 129, 0.5);
+  animation: gpayRippleExpand 2.2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+  pointer-events: none;
+}
+
+.gpay-ripple.r2 {
+  animation-delay: 0.5s;
+}
+
+.gpay-ripple.r3 {
+  animation-delay: 1.0s;
+}
+
+@keyframes gpayRippleExpand {
+  0% { transform: scale(0.85); opacity: 0.95; }
+  100% { transform: scale(1.95); opacity: 0; }
+}
+
+/* Google Pay Style Vibrant Green Circle & Checkmark */
+.gpay-green-circle {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00E676 0%, #00C853 50%, #059669 100%);
+  box-shadow: 0 0 32px rgba(0, 230, 118, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  animation: gpayCirclePopIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes gpayCirclePopIn {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.18); opacity: 1; }
+  85% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.gpay-checkmark-svg {
+  width: 56px;
+  height: 56px;
+  display: block;
+}
+
+.gpay-checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 3.5;
+  stroke-miterlimit: 10;
+  stroke: rgba(255, 255, 255, 0.35);
+  animation: gpayStroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) 0.1s forwards;
+}
+
+.gpay-checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  stroke: #ffffff;
+  stroke-width: 4.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: gpayCheckDraw 0.45s cubic-bezier(0.65, 0, 0.45, 1) 0.35s forwards;
+}
+
+@keyframes gpayStroke {
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes gpayCheckDraw {
+  100% { stroke-dashoffset: 0; }
+}
+
+/* Floating Confetti / Burst Particles */
+.gpay-particles-wrap {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 140px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gpay-particle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00E676;
+  box-shadow: 0 0 8px #00E676;
+  opacity: 0;
+  animation: gpayParticleBurst 0.9s cubic-bezier(0.12, 0.8, 0.32, 1) 0.25s forwards;
+}
+
+.gpay-particle.p1 { top: 0; left: 50%; background: #34D399; }
+.gpay-particle.p2 { top: 15%; right: 10%; background: #FBBF24; width: 6px; height: 6px; }
+.gpay-particle.p3 { top: 50%; right: 0; background: #60A5FA; }
+.gpay-particle.p4 { bottom: 15%; right: 15%; background: #A78BFA; width: 8px; height: 8px; }
+.gpay-particle.p5 { bottom: 0; left: 50%; background: #00E676; }
+.gpay-particle.p6 { bottom: 15%; left: 15%; background: #F43F5E; width: 6px; height: 6px; }
+.gpay-particle.p7 { top: 50%; left: 0; background: #38BDF8; }
+.gpay-particle.p8 { top: 15%; left: 10%; background: #FBBF24; width: 8px; height: 8px; }
+
+@keyframes gpayParticleBurst {
+  0% { transform: translate(0, 0) scale(0.2); opacity: 0; }
+  40% { opacity: 1; }
+  100% {
+    transform: translate(var(--dx, 0), var(--dy, 0)) scale(1);
+    opacity: 0;
+  }
+}
+.gpay-particle.p1 { --dx: 0px; --dy: -44px; }
+.gpay-particle.p2 { --dx: 40px; --dy: -34px; }
+.gpay-particle.p3 { --dx: 50px; --dy: 0px; }
+.gpay-particle.p4 { --dx: 38px; --dy: 40px; }
+.gpay-particle.p5 { --dx: 0px; --dy: 48px; }
+.gpay-particle.p6 { --dx: -38px; --dy: 40px; }
+.gpay-particle.p7 { --dx: -50px; --dy: 0px; }
+.gpay-particle.p8 { --dx: -40px; --dy: -34px; }
+
+/* Content Text & Metrics */
+.gpay-success-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #34d399;
+  margin-bottom: 12px;
+}
+
+.gpay-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.gpay-project-title {
+  font-size: 21px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+
+.gpay-project-meta {
+  font-size: 12.5px;
+  color: #a1a1aa;
+  margin-bottom: 18px;
+}
+
+.gpay-status-pill-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.gpay-metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.gpay-metric-label {
+  font-size: 10px;
+  color: #71717a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gpay-metric-val {
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.gpay-metric-sep {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.gpay-subtext {
+  font-size: 12px;
+  color: #71717a;
+  line-height: 1.5;
+  margin-bottom: 22px;
+}
+
+.gpay-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.gpay-done-btn {
+  background: linear-gradient(135deg, #00C853, #059669);
+  color: #ffffff;
+  border: none;
+  padding: 11px 36px;
+  border-radius: 24px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(0, 200, 83, 0.35);
+  transition: all 0.2s ease;
+}
+
+.gpay-done-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 26px rgba(0, 200, 83, 0.55);
+}
+
+.gpay-done-btn:active {
+  transform: translateY(0);
+}
+
 

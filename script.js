@@ -333,6 +333,12 @@ const GoogleSheetsSync = {
       project: project
     });
   },
+  async reopenProject(project) {
+    return this.postToGas({
+      action: 'reopen_project',
+      project: project
+    });
+  },
   async testConnection() {
     const url = this.getUrl();
     if (!url) {
@@ -1288,20 +1294,21 @@ function startLiveClock() {
 // Dynamically recalculates KPI counts and totals strictly from actual live datasets
 function recalculateRealKPIs() {
   const projects = MockDataStore.projects || [];
+  const completedProjectsList = MockDataStore.completedProjects || [];
   const clients = MockDataStore.clients || [];
   const freelancers = MockDataStore.freelancers || [];
   const clientPayments = MockDataStore.clientPayments || [];
   const disbursements = MockDataStore.freelancerDisbursements || [];
 
-  const totalProjects = projects.length;
-  const activeProjects = projects.filter(p => p.status === 'Active' || p.status === 'In Progress').length;
-  const completedProjects = projects.filter(p => p.status === 'Completed').length || (MockDataStore.completedProjects || []).length;
+  const activeProjects = projects.length;
+  const completedProjects = completedProjectsList.length;
+  const totalProjects = activeProjects + completedProjects;
   const totalFreelancers = freelancers.length;
   const totalClients = clients.length;
 
   // Calculate real revenue from paid invoices or project budgets
   const paidInvoicesSum = clientPayments.filter(p => p.status === 'Paid').reduce((s, p) => s + (Number(p.amount) || 0), 0);
-  const totalRev = paidInvoicesSum > 0 ? paidInvoicesSum : projects.reduce((s, p) => s + (Number(p.budget) || 0), 0);
+  const totalRev = paidInvoicesSum > 0 ? paidInvoicesSum : (projects.reduce((s, p) => s + (Number(p.budget) || 0), 0) + completedProjectsList.reduce((s, p) => s + (Number(p.budget) || 0), 0));
 
   // Client pending payments
   const pendingInvoicesSum = clientPayments.filter(p => p.status === 'Pending' || p.status === 'Due').reduce((s, p) => s + (Number(p.amount) || 0), 0);
@@ -1347,11 +1354,15 @@ function recalculateRealKPIs() {
   const elFlPending = document.getElementById('kpi-val-freelancer-pending');
   if (elFlPending) elFlPending.setAttribute('data-target', flDue);
 
-  // Update navigation counters
+  // Update navigation & subtab counters
   const badgeClients = document.getElementById('badge-total-clients');
   if (badgeClients) badgeClients.textContent = totalClients;
   const badgeProjects = document.getElementById('badge-total-projects');
-  if (badgeProjects) badgeProjects.textContent = totalProjects;
+  if (badgeProjects) badgeProjects.textContent = activeProjects;
+  const badgeActiveSubtab = document.getElementById('badge-subtab-active-projects');
+  if (badgeActiveSubtab) badgeActiveSubtab.textContent = activeProjects;
+  const badgeCompletedSubtab = document.getElementById('badge-subtab-completed-projects');
+  if (badgeCompletedSubtab) badgeCompletedSubtab.textContent = completedProjects;
   const badgeFreelancers = document.getElementById('badge-total-freelancers');
   if (badgeFreelancers) badgeFreelancers.textContent = totalFreelancers;
   const badgeAdmins = document.getElementById('badge-total-admins');
@@ -1625,6 +1636,7 @@ function renderAllViews() {
   renderDashboardRecentTables();
   renderClientsTable();
   renderProjectsTable();
+  renderCompletedProjectsTable();
   renderFreelancersTable();
   renderClientPaymentsTable();
   renderFreelancerPayoutsTable();
@@ -1793,7 +1805,7 @@ function renderClientsTable(filterText = '', serviceFilter = 'all', statusFilter
   }).join('');
 }
 
-// 3. Projects Management View
+// 3. Projects Management View (Active Sprints)
 function renderProjectsTable(filterText = '', serviceFilter = 'all', statusFilter = 'all') {
   const tbody = document.getElementById('projects-table-body');
   if (!tbody) return;
@@ -1817,7 +1829,7 @@ function renderProjectsTable(filterText = '', serviceFilter = 'all', statusFilte
   });
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 24px; color: #71717a;">No projects matching criteria</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 24px; color: #71717a;">No active projects matching criteria</td></tr>`;
     return;
   }
 
@@ -1858,6 +1870,9 @@ function renderProjectsTable(filterText = '', serviceFilter = 'all', statusFilte
         <td class="font-mono text-muted">${p.deadline}</td>
         <td>
           <div class="action-icon-group">
+            <button class="action-icon-btn complete ${p.status === 'Completed' ? 'is-completed' : ''}" title="Complete Project & Move to Completed Archive" onclick="markProjectComplete('${p.id}')">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
             <button class="action-icon-btn view" title="View Project Overview & Margins" onclick="openDetailDrawer('project', '${p.id}')">
               <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
@@ -1873,6 +1888,103 @@ function renderProjectsTable(filterText = '', serviceFilter = 'all', statusFilte
     `;
   }).join('');
 }
+
+// 3B. Completed Projects Archive Table View
+function renderCompletedProjectsTable(filterText = '', serviceFilter = 'all') {
+  const tbody = document.getElementById('completed-projects-table-body');
+  if (!tbody) return;
+
+  const fText = (filterText || '').toLowerCase();
+  const filtered = (MockDataStore.completedProjects || []).filter(p => {
+    if (!p) return false;
+    const nameStr = String(p.name || '').toLowerCase();
+    const idStr = String(p.id || '').toLowerCase();
+    const clientStr = String(p.client || '').toLowerCase();
+    const notesStr = String(p.notes || '').toLowerCase();
+    const flNameStr = String(p.assignedFreelancerName || '').toLowerCase();
+    const matchSearch = nameStr.includes(fText) ||
+      idStr.includes(fText) ||
+      clientStr.includes(fText) ||
+      notesStr.includes(fText) ||
+      flNameStr.includes(fText);
+    const matchService = serviceFilter === 'all' || p.service === serviceFilter;
+    return matchSearch && matchService;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 28px; color: #71717a;">No completed projects in archive</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(p => {
+    const initials = String(p.assignedFreelancerName || 'S').substring(0, 2).toUpperCase();
+    const compDate = p.completionDate || 'Delivered';
+    return `
+      <tr>
+        <td class="font-mono text-muted">${p.id}</td>
+        <td class="primary-cell">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 600; color: #ffffff;">${escapeHtml(p.name)}</span>
+            ${getServiceBadge(p.service)}
+          </div>
+        </td>
+        <td>${escapeHtml(p.client)}</td>
+        <td class="font-mono text-green">${formatINR(p.budget)}</td>
+        <td>
+          <div class="assigned-freelancer-pill">
+            <div class="mini-avatar" style="background: rgba(16,185,129,0.15); color: #34d399;">${initials}</div>
+            <span>${escapeHtml(p.assignedFreelancerName || 'Specialist')}</span>
+          </div>
+        </td>
+        <td class="font-mono" style="color: #34d399; font-weight: 600;">✓ ${escapeHtml(compDate)}</td>
+        <td>
+          <div class="project-notes-snippet" title="${escapeHtml(p.notes || 'Scope delivered')}">
+            <span>${escapeHtml(p.notes || 'Delivered & verified')}</span>
+          </div>
+        </td>
+        <td>
+          <div class="action-icon-group">
+            <button class="action-icon-btn view" title="View Completed Summary" onclick="openDetailDrawer('project', '${p.id}')">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+            <button class="action-icon-btn edit" title="Reopen & Restore to Active Sprints" onclick="reopenCompletedProject('${p.id}')" style="color: #fbbf24;">
+              <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+            </button>
+            <button class="action-icon-btn delete" title="Permanently Delete" onclick="confirmDeleteEntity('project', '${p.id}', '${escapeHtml(p.name)}')">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Subtab switcher for Projects: Active Sprints vs Completed Projects Archive
+function switchProjectSubTab(tabName) {
+  const btnActive = document.getElementById('subtab-btn-active-projects');
+  const btnCompleted = document.getElementById('subtab-btn-completed-projects');
+  const cardActive = document.getElementById('card-active-projects-table');
+  const cardCompleted = document.getElementById('card-completed-projects-table');
+  const statusFilter = document.getElementById('project-status-filter');
+
+  if (tabName === 'completed') {
+    if (btnActive) btnActive.classList.remove('active');
+    if (btnCompleted) btnCompleted.classList.add('active');
+    if (cardActive) cardActive.classList.add('hidden');
+    if (cardCompleted) cardCompleted.classList.remove('hidden');
+    if (statusFilter) statusFilter.style.display = 'none';
+    renderCompletedProjectsTable();
+  } else {
+    if (btnActive) btnActive.classList.add('active');
+    if (btnCompleted) btnCompleted.classList.remove('active');
+    if (cardActive) cardActive.classList.remove('hidden');
+    if (cardCompleted) cardCompleted.classList.add('hidden');
+    if (statusFilter) statusFilter.style.display = '';
+    renderProjectsTable();
+  }
+}
+window.switchProjectSubTab = switchProjectSubTab;
 
 // 4. Freelancers Directory View
 function renderFreelancersTable(filterText = '', paymentFilter = 'all', statusFilter = 'all', skillFilter = 'all') {
@@ -2387,6 +2499,7 @@ if (projectFilterInput && projectStatusFilter) {
   const handler = () => {
     const sFilter = projectServiceFilter ? projectServiceFilter.value : 'all';
     renderProjectsTable(projectFilterInput.value, sFilter, projectStatusFilter.value);
+    renderCompletedProjectsTable(projectFilterInput.value, sFilter);
   };
   projectFilterInput.addEventListener('input', handler);
   projectStatusFilter.addEventListener('change', handler);
@@ -2522,12 +2635,12 @@ window.openDetailDrawer = function (type, id) {
   if (!drawer || !backdrop || !contentBody) return;
 
   if (type === 'project') {
-    const p = MockDataStore.projects.find(item => item.id === id);
+    const p = (MockDataStore.projects || []).find(item => item.id === id) || (MockDataStore.completedProjects || []).find(item => item.id === id);
     if (!p) return;
 
     pretitle.textContent = p.id;
     title.textContent = p.name;
-    btnActionText.textContent = 'Edit Project';
+    btnActionText.textContent = p.status === 'Completed' ? 'View/Reopen Project' : 'Edit Project';
     btnAction.onclick = () => {
       closeDetailDrawer();
       openEditProjectModal(p.id);
@@ -3006,10 +3119,9 @@ window.confirmDeleteEntity = function (type, id, displayName) {
 
 function executeDeleteEntity(type, id, displayName) {
   if (type === 'project') {
-    MockDataStore.projects = MockDataStore.projects.filter(p => p.id !== id);
-    MockDataStore.kpis.totalProjects = Math.max(0, MockDataStore.kpis.totalProjects - 1);
-    const badge = document.getElementById('badge-total-projects');
-    if (badge) badge.textContent = MockDataStore.projects.length;
+    MockDataStore.projects = (MockDataStore.projects || []).filter(p => p.id !== id);
+    MockDataStore.completedProjects = (MockDataStore.completedProjects || []).filter(p => p.id !== id);
+    recalculateRealKPIs();
   } else if (type === 'client') {
     MockDataStore.clients = MockDataStore.clients.filter(c => c.id !== id);
     MockDataStore.kpis.clients = Math.max(0, MockDataStore.kpis.clients - 1);
@@ -3042,20 +3154,397 @@ function executeDeleteEntity(type, id, displayName) {
   showToast(`Successfully removed ${displayName} (${id})`, 'success');
 }
 
-// Populate Freelancer Dropdowns for Projects
+/* ----------------------------------------------------------------------------
+ * 8B. Google Pay Style Project Completion Celebration & Sound
+ * ---------------------------------------------------------------------------- */
+function playGooglePaySuccessChime() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    
+    // Play 3 rapid ascending sweet bell harmonic notes (C6, E6, G6)
+    const notes = [1046.50, 1318.51, 1567.98];
+    const times = [0, 0.09, 0.18];
+    
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + times[idx]);
+      
+      gain.gain.setValueAtTime(0.001, ctx.currentTime + times[idx]);
+      gain.gain.exponentialRampToValueAtTime(0.24, ctx.currentTime + times[idx] + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + times[idx] + 0.5);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(ctx.currentTime + times[idx]);
+      osc.stop(ctx.currentTime + times[idx] + 0.55);
+    });
+  } catch (err) {
+    // Audio synthesis gracefully handled
+  }
+}
+window.playGooglePaySuccessChime = playGooglePaySuccessChime;
+
+function showProjectCompleteCelebration(project) {
+  if (!project) return;
+  
+  const modal = document.getElementById('modal-project-complete-celebration');
+  const titleEl = document.getElementById('gpay-proj-title');
+  const metaEl = document.getElementById('gpay-proj-meta');
+  const subtextEl = document.getElementById('gpay-proj-subtext');
+  
+  if (titleEl) titleEl.textContent = project.name || 'Enterprise Project';
+  if (metaEl) metaEl.innerHTML = `<span class="font-mono">${escapeHtml(project.id)}</span> &bull; ${escapeHtml(project.service || 'Web Development')} &bull; Client: <strong>${escapeHtml(project.client || 'Enterprise Client')}</strong>`;
+  if (subtextEl) {
+    const flName = (project.assignedFreelancerName && project.assignedFreelancerName !== 'Unassigned') ? ` (Specialist: ${escapeHtml(project.assignedFreelancerName)})` : '';
+    subtextEl.textContent = `Project ${project.id} is 100% Completed${flName} and synchronized live with the Google Sheet database.`;
+  }
+  
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden', 'false');
+    
+    playGooglePaySuccessChime();
+    
+    // Re-trigger CSS animations on circle & checkmark
+    const circle = modal.querySelector('.gpay-green-circle');
+    if (circle) {
+      circle.style.animation = 'none';
+      circle.offsetHeight; // reflow
+      circle.style.animation = '';
+    }
+    const checkPath = modal.querySelector('.gpay-checkmark-check');
+    if (checkPath) {
+      checkPath.style.animation = 'none';
+      checkPath.offsetHeight; // reflow
+      checkPath.style.animation = '';
+    }
+    const circleRing = modal.querySelector('.gpay-checkmark-circle');
+    if (circleRing) {
+      circleRing.style.animation = 'none';
+      circleRing.offsetHeight; // reflow
+      circleRing.style.animation = '';
+    }
+  }
+}
+window.showProjectCompleteCelebration = showProjectCompleteCelebration;
+
+function closeProjectCelebrationModal() {
+  const modal = document.getElementById('modal-project-complete-celebration');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+window.closeProjectCelebrationModal = closeProjectCelebrationModal;
+
+function markProjectComplete(projectId) {
+  const proj = (MockDataStore.projects || []).find(p => p.id === projectId);
+  if (!proj) return;
+
+  const compDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const compItem = {
+    id: proj.id,
+    name: proj.name,
+    service: proj.service || 'Web Development',
+    client: proj.client || 'Enterprise Client',
+    budget: proj.budget || 50000,
+    progress: 100,
+    status: 'Completed',
+    assignedFreelancerId: proj.assignedFreelancerId || null,
+    assignedFreelancerName: proj.assignedFreelancerName || 'Specialist',
+    completionDate: compDate,
+    notes: proj.notes || 'Delivered & verified'
+  };
+
+  // Remove from active projects
+  MockDataStore.projects = (MockDataStore.projects || []).filter(p => p.id !== projectId);
+
+  // Add to completed projects archive (upsert)
+  if (!MockDataStore.completedProjects) MockDataStore.completedProjects = [];
+  const existingIdx = MockDataStore.completedProjects.findIndex(cp => cp.id === projectId);
+  if (existingIdx >= 0) {
+    MockDataStore.completedProjects[existingIdx] = compItem;
+  } else {
+    MockDataStore.completedProjects.unshift(compItem);
+  }
+
+  StorageManager.save();
+  GoogleSheetsSync.completeProject(compItem);
+  recalculateRealKPIs();
+  renderAllViews();
+  showProjectCompleteCelebration(compItem);
+  showToast(`Project "${compItem.name}" completed & moved to Completed Projects Archive!`, 'success');
+}
+window.markProjectComplete = markProjectComplete;
+
+function reopenCompletedProject(projectId) {
+  if (!MockDataStore.completedProjects) return;
+  const compIdx = MockDataStore.completedProjects.findIndex(cp => cp.id === projectId);
+  if (compIdx === -1) return;
+
+  const compProj = MockDataStore.completedProjects[compIdx];
+  // Remove from completedProjects
+  MockDataStore.completedProjects.splice(compIdx, 1);
+
+  // Restore to active projects
+  if (!MockDataStore.projects) MockDataStore.projects = [];
+  const reopenedProj = {
+    id: compProj.id,
+    name: compProj.name,
+    service: compProj.service || 'Web Development',
+    client: compProj.client || 'Enterprise Client',
+    budget: compProj.budget || 50000,
+    progress: 90,
+    status: 'In Review',
+    notes: compProj.notes || 'Reopened from Completed Archive for revision',
+    assignedFreelancerId: compProj.assignedFreelancerId || null,
+    assignedFreelancerName: compProj.assignedFreelancerName || 'Unassigned',
+    deadline: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]
+  };
+
+  MockDataStore.projects.unshift(reopenedProj);
+
+  StorageManager.save();
+  GoogleSheetsSync.reopenProject(reopenedProj);
+  recalculateRealKPIs();
+  renderAllViews();
+  switchProjectSubTab('active');
+  showToast(`Project ${reopenedProj.id} restored to Active Sprints (Status: In Review)`, 'info');
+}
+window.reopenCompletedProject = reopenCompletedProject;
+
+// Backdrop dismiss for celebration modal
+document.addEventListener('click', (e) => {
+  const gpayModal = document.getElementById('modal-project-complete-celebration');
+  if (gpayModal && e.target === gpayModal) {
+    closeProjectCelebrationModal();
+  }
+});
+
+// Searchable Dropdowns for Project Modals (Client & Freelancer)
 function populateProjectFreelancerDropdowns() {
-  const newSelect = document.getElementById('new-proj-freelancer');
-  const editSelect = document.getElementById('edit-proj-freelancer');
+  populateProjectSearchableDropdowns();
+}
 
-  const optionsHtml = `
-    <option value="">Unassigned (Open Position)</option>
-    ${MockDataStore.freelancers.map(f => `<option value="${f.id}">${escapeHtml(f.name)} (${f.id})</option>`).join('')}
-  `;
+function populateProjectSearchableDropdowns() {
+  const clients = MockDataStore.clients || [];
+  const freelancers = MockDataStore.freelancers || [];
 
-  if (newSelect) newSelect.innerHTML = optionsHtml;
-  if (editSelect) editSelect.innerHTML = optionsHtml;
+  // Populate Client Searchable Dropdowns
+  renderSearchableClientOptions('new-proj-client', clients);
+  renderSearchableClientOptions('edit-proj-client', clients);
+
+  // Populate Freelancer Searchable Dropdowns
+  renderSearchableFreelancerOptions('new-proj-freelancer', freelancers);
+  renderSearchableFreelancerOptions('edit-proj-freelancer', freelancers);
+
   populateProvisionFreelancerDropdown();
 }
+
+function renderSearchableClientOptions(prefix, clientList, filterQuery = '') {
+  const menu = document.getElementById(`menu-${prefix}`);
+  const hiddenInput = document.getElementById(prefix);
+  const searchInput = document.getElementById(`${prefix}-search`);
+  const wrap = document.getElementById(`wrap-${prefix}`);
+  if (!menu || !hiddenInput || !searchInput || !wrap) return;
+
+  const q = (filterQuery || '').toLowerCase().trim();
+  const filtered = clientList.filter(c => {
+    if (!c) return false;
+    if (!q) return true;
+    const name = String(c.name || '').toLowerCase();
+    const id = String(c.id || '').toLowerCase();
+    const email = String(c.email || '').toLowerCase();
+    const svcs = Array.isArray(c.services) ? c.services.join(' ').toLowerCase() : '';
+    return name.includes(q) || id.includes(q) || email.includes(q) || svcs.includes(q);
+  });
+
+  if (filtered.length === 0) {
+    menu.innerHTML = `
+      <div class="searchable-empty-item">
+        <span>No matching clients found</span>
+        <button type="button" class="searchable-add-quick-btn" onclick="openModal('modal-new-client')">+ Add New Client Account</button>
+      </div>
+    `;
+    return;
+  }
+
+  menu.innerHTML = filtered.map(c => {
+    const initials = String(c.name || 'C').substring(0, 2).toUpperCase();
+    const isSelected = hiddenInput.value === c.name;
+    const svcsText = (c.services && c.services.length > 0) ? c.services.join(', ') : 'Web Development';
+    return `
+      <div class="searchable-option-item ${isSelected ? 'selected' : ''}" data-val="${escapeHtml(c.name)}" data-id="${escapeHtml(c.id)}">
+        <div class="searchable-option-main">
+          <div class="searchable-option-avatar">${initials}</div>
+          <div>
+            <div class="searchable-option-title">${escapeHtml(c.name)}</div>
+            <div class="searchable-option-subtitle"><span class="font-mono text-muted">${c.id}</span> &bull; ${escapeHtml(svcsText)}</div>
+          </div>
+        </div>
+        <span class="status-pill ${(c.status || 'active').toLowerCase().replace(/\s+/g, '-')}">${c.status || 'Active'}</span>
+      </div>
+    `;
+  }).join('');
+
+  menu.querySelectorAll('.searchable-option-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const val = item.getAttribute('data-val');
+      hiddenInput.value = val;
+      searchInput.value = val;
+      wrap.classList.remove('open');
+      renderSearchableClientOptions(prefix, clientList);
+    });
+  });
+}
+
+function renderSearchableFreelancerOptions(prefix, freelancerList, filterQuery = '') {
+  const menu = document.getElementById(`menu-${prefix}`);
+  const hiddenInput = document.getElementById(prefix);
+  const searchInput = document.getElementById(`${prefix}-search`);
+  const wrap = document.getElementById(`wrap-${prefix}`);
+  if (!menu || !hiddenInput || !searchInput || !wrap) return;
+
+  const q = (filterQuery || '').toLowerCase().trim();
+  const filtered = freelancerList.filter(f => {
+    if (!f) return false;
+    if (!q) return true;
+    const name = String(f.name || '').toLowerCase();
+    const id = String(f.id || '').toLowerCase();
+    const email = String(f.email || '').toLowerCase();
+    const skills = Array.isArray(f.skills) ? f.skills.join(' ').toLowerCase() : '';
+    return name.includes(q) || id.includes(q) || email.includes(q) || skills.includes(q);
+  });
+
+  let optionsHtml = '';
+  if (!q || 'unassigned open position'.includes(q)) {
+    const isUnassignedSelected = !hiddenInput.value;
+    optionsHtml += `
+      <div class="searchable-option-item ${isUnassignedSelected ? 'selected' : ''}" data-val="" data-name="Unassigned">
+        <div class="searchable-option-main">
+          <div class="searchable-option-avatar" style="background: rgba(255,255,255,0.06); color: #a1a1aa;">&bull;</div>
+          <div>
+            <div class="searchable-option-title" style="color: #a1a1aa;">Unassigned</div>
+            <div class="searchable-option-subtitle">Open Position for Sprint Allocation</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (filtered.length === 0 && !optionsHtml) {
+    menu.innerHTML = `
+      <div class="searchable-empty-item">
+        <span>No matching freelancers found in database</span>
+        <button type="button" class="searchable-add-quick-btn" onclick="openModal('modal-new-freelancer')">+ Add New Freelancer</button>
+      </div>
+    `;
+    return;
+  }
+
+  optionsHtml += filtered.map(f => {
+    const initials = String(f.name || 'FL').substring(0, 2).toUpperCase();
+    const isSelected = hiddenInput.value === f.id;
+    const skillsText = (f.skills && f.skills.length > 0) ? f.skills.join(', ') : 'Specialist';
+    return `
+      <div class="searchable-option-item ${isSelected ? 'selected' : ''}" data-val="${escapeHtml(f.id)}" data-name="${escapeHtml(f.name)}">
+        <div class="searchable-option-main">
+          <div class="searchable-option-avatar">${initials}</div>
+          <div>
+            <div class="searchable-option-title">${escapeHtml(f.name)}</div>
+            <div class="searchable-option-subtitle"><span class="font-mono text-muted">${f.id}</span> &bull; ${escapeHtml(skillsText)}</div>
+          </div>
+        </div>
+        <span class="status-pill ${(f.status || 'active').toLowerCase().replace(/\s+/g, '-')}">${f.status || 'Active'}</span>
+      </div>
+    `;
+  }).join('');
+
+  menu.innerHTML = optionsHtml;
+
+  menu.querySelectorAll('.searchable-option-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const val = item.getAttribute('data-val');
+      const name = item.getAttribute('data-name');
+      hiddenInput.value = val;
+      searchInput.value = name || 'Unassigned';
+      wrap.classList.remove('open');
+      renderSearchableFreelancerOptions(prefix, freelancerList);
+    });
+  });
+}
+
+function setupSearchableSelectListeners(prefix, isFreelancer = false) {
+  const wrap = document.getElementById(`wrap-${prefix}`);
+  const toggleBtn = document.getElementById(`btn-toggle-${prefix}`);
+  const searchInput = document.getElementById(`${prefix}-search`);
+  const hiddenInput = document.getElementById(prefix);
+
+  if (!wrap || !searchInput) return;
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = wrap.classList.contains('open');
+      document.querySelectorAll('.searchable-select-wrap.open').forEach(w => {
+        if (w !== wrap) w.classList.remove('open');
+      });
+      if (isOpen) {
+        wrap.classList.remove('open');
+      } else {
+        wrap.classList.add('open');
+        if (isFreelancer) {
+          renderSearchableFreelancerOptions(prefix, MockDataStore.freelancers || []);
+        } else {
+          renderSearchableClientOptions(prefix, MockDataStore.clients || []);
+        }
+        searchInput.focus();
+      }
+    });
+  }
+
+  searchInput.addEventListener('focus', () => {
+    document.querySelectorAll('.searchable-select-wrap.open').forEach(w => {
+      if (w !== wrap) w.classList.remove('open');
+    });
+    wrap.classList.add('open');
+    if (isFreelancer) {
+      renderSearchableFreelancerOptions(prefix, MockDataStore.freelancers || [], searchInput.value);
+    } else {
+      renderSearchableClientOptions(prefix, MockDataStore.clients || [], searchInput.value);
+    }
+  });
+
+  searchInput.addEventListener('input', () => {
+    wrap.classList.add('open');
+    if (!isFreelancer && hiddenInput) {
+      hiddenInput.value = searchInput.value;
+    }
+    if (isFreelancer) {
+      renderSearchableFreelancerOptions(prefix, MockDataStore.freelancers || [], searchInput.value);
+    } else {
+      renderSearchableClientOptions(prefix, MockDataStore.clients || [], searchInput.value);
+    }
+  });
+}
+
+// Global click-away listener for searchable dropdowns
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.searchable-select-wrap')) {
+    document.querySelectorAll('.searchable-select-wrap.open').forEach(w => w.classList.remove('open'));
+  }
+});
 
 // Populate Freelancer Portal Provisioning Dropdown
 function populateProvisionFreelancerDropdown() {
@@ -3273,28 +3762,32 @@ window.openViewFreelancerProjectsModal = function (id) {
 
 // Open Edit Project Modal & Populate Current Data
 window.openEditProjectModal = function (id) {
-  const p = MockDataStore.projects.find(proj => proj.id === id);
+  const p = (MockDataStore.projects || []).find(proj => proj.id === id) || (MockDataStore.completedProjects || []).find(proj => proj.id === id);
   if (!p) return;
 
   const idInput = document.getElementById('edit-proj-id');
   const titleInput = document.getElementById('edit-proj-title');
   const serviceInput = document.getElementById('edit-proj-service');
   const clientInput = document.getElementById('edit-proj-client');
+  const clientSearchInput = document.getElementById('edit-proj-client-search');
   const budgetInput = document.getElementById('edit-proj-budget');
-  const freelancerSelect = document.getElementById('edit-proj-freelancer');
+  const freelancerInput = document.getElementById('edit-proj-freelancer');
+  const freelancerSearchInput = document.getElementById('edit-proj-freelancer-search');
   const deadlineInput = document.getElementById('edit-proj-deadline');
   const progressInput = document.getElementById('edit-proj-progress');
   const statusInput = document.getElementById('edit-proj-status');
   const notesInput = document.getElementById('edit-proj-notes');
 
-  populateProjectFreelancerDropdowns();
+  populateProjectSearchableDropdowns();
 
   if (idInput) idInput.value = p.id;
   if (titleInput) titleInput.value = p.name || '';
   if (serviceInput) serviceInput.value = p.service || 'Web Development';
   if (clientInput) clientInput.value = p.client || '';
+  if (clientSearchInput) clientSearchInput.value = p.client || '';
   if (budgetInput) budgetInput.value = p.budget || 50000;
-  if (freelancerSelect) freelancerSelect.value = p.assignedFreelancerId || '';
+  if (freelancerInput) freelancerInput.value = p.assignedFreelancerId || '';
+  if (freelancerSearchInput) freelancerSearchInput.value = p.assignedFreelancerName || 'Unassigned';
   if (deadlineInput) deadlineInput.value = p.deadline || '2026-11-30';
   if (progressInput) progressInput.value = p.progress !== undefined ? p.progress : 15;
   if (statusInput) statusInput.value = p.status || 'Active';
@@ -3309,6 +3802,12 @@ window.openEditProjectModal = function (id) {
 function setupModalHandlers() {
   if (window._modalHandlersInitialized) return;
   window._modalHandlersInitialized = true;
+
+  // Setup Searchable Select Listeners for Project Modals
+  setupSearchableSelectListeners('new-proj-client', false);
+  setupSearchableSelectListeners('new-proj-freelancer', true);
+  setupSearchableSelectListeners('edit-proj-client', false);
+  setupSearchableSelectListeners('edit-proj-freelancer', true);
 
   // Open buttons
   const modalOpeners = [
@@ -3328,7 +3827,17 @@ function setupModalHandlers() {
     const el = document.getElementById(item.btn);
     if (el) {
       el.addEventListener('click', () => {
-        populateProjectFreelancerDropdowns();
+        populateProjectSearchableDropdowns();
+        if (item.modal === 'modal-new-project') {
+          const clientSearch = document.getElementById('new-proj-client-search');
+          const clientHidden = document.getElementById('new-proj-client');
+          const freeSearch = document.getElementById('new-proj-freelancer-search');
+          const freeHidden = document.getElementById('new-proj-freelancer');
+          if (clientSearch) clientSearch.value = '';
+          if (clientHidden) clientHidden.value = '';
+          if (freeSearch) freeSearch.value = '';
+          if (freeHidden) freeHidden.value = '';
+        }
         if (item.modal === 'modal-google-sheets-sync') {
           GoogleSheetsSync.updateStatusUI();
         }
@@ -3519,13 +4028,21 @@ function setupModalHandlers() {
       e.preventDefault();
       const title = document.getElementById('new-proj-title').value.trim();
       const service = document.getElementById('new-proj-service').value;
-      const client = document.getElementById('new-proj-client').value.trim();
+      const clientHidden = document.getElementById('new-proj-client');
+      const clientSearch = document.getElementById('new-proj-client-search');
+      const client = (clientHidden && clientHidden.value ? clientHidden.value : (clientSearch ? clientSearch.value : '')).trim();
       const budget = parseInt(document.getElementById('new-proj-budget').value, 10) || 50000;
       const freelancerId = document.getElementById('new-proj-freelancer').value;
       const deadline = document.getElementById('new-proj-deadline').value || '2026-11-30';
       const progress = parseInt(document.getElementById('new-proj-progress').value, 10) || 0;
       const status = document.getElementById('new-proj-status').value;
       const notes = document.getElementById('new-proj-notes').value.trim();
+
+      if (!client) {
+        showToast('Please select or search a client from Google Sheets', 'default');
+        if (clientSearch) clientSearch.focus();
+        return;
+      }
 
       let assignedFreelancerName = 'Unassigned';
       if (freelancerId) {
@@ -3535,7 +4052,17 @@ function setupModalHandlers() {
         }
       }
 
-      const newId = `PRJ-${300 + MockDataStore.projects.length + 1}`;
+      let maxPrjNum = 300;
+      (MockDataStore.projects || []).forEach(p => {
+        if (p && p.id) {
+          const match = String(p.id).match(/PRJ-(\d+)/i);
+          if (match) {
+            const n = parseInt(match[1], 10);
+            if (n > maxPrjNum) maxPrjNum = n;
+          }
+        }
+      });
+      const newId = `PRJ-${maxPrjNum + 1}`;
       const newProj = {
         id: newId,
         name: title,
@@ -3573,7 +4100,13 @@ function setupModalHandlers() {
       renderAllViews();
       closeModal('modal-new-project');
       formProject.reset();
-      showToast(`Project "${title}" (${service}) created with ID ${newId}`, 'success');
+      if (clientSearch) clientSearch.value = '';
+      if (clientHidden) clientHidden.value = '';
+      const freeSearch = document.getElementById('new-proj-freelancer-search');
+      const freeHidden = document.getElementById('new-proj-freelancer');
+      if (freeSearch) freeSearch.value = '';
+      if (freeHidden) freeHidden.value = '';
+      showToast(`Project "${title}" (${service}) created & synced to Google Sheets!`, 'success');
     });
   }
 
@@ -3583,15 +4116,19 @@ function setupModalHandlers() {
     formEditProject.addEventListener('submit', (e) => {
       e.preventDefault();
       const id = document.getElementById('edit-proj-id').value;
-      const proj = MockDataStore.projects.find(p => p.id === id);
+      let proj = (MockDataStore.projects || []).find(p => p.id === id) || (MockDataStore.completedProjects || []).find(p => p.id === id);
       if (!proj) return;
 
       const prevFreelancerId = proj.assignedFreelancerId;
       const newFreelancerId = document.getElementById('edit-proj-freelancer').value;
 
+      const clientHidden = document.getElementById('edit-proj-client');
+      const clientSearch = document.getElementById('edit-proj-client-search');
+      const client = (clientHidden && clientHidden.value ? clientHidden.value : (clientSearch ? clientSearch.value : '')).trim();
+
       proj.name = document.getElementById('edit-proj-title').value.trim();
       proj.service = document.getElementById('edit-proj-service').value;
-      proj.client = document.getElementById('edit-proj-client').value.trim();
+      proj.client = client || proj.client;
       proj.budget = parseInt(document.getElementById('edit-proj-budget').value, 10) || 50000;
       proj.deadline = document.getElementById('edit-proj-deadline').value;
       proj.progress = parseInt(document.getElementById('edit-proj-progress').value, 10) || 0;
@@ -3601,14 +4138,14 @@ function setupModalHandlers() {
       // Manage freelancer reallocation
       if (prevFreelancerId !== newFreelancerId) {
         if (prevFreelancerId) {
-          const oldFree = MockDataStore.freelancers.find(fl => fl.id === prevFreelancerId);
+          const oldFree = (MockDataStore.freelancers || []).find(fl => fl.id === prevFreelancerId);
           if (oldFree && oldFree.assignedProjects) {
             oldFree.assignedProjects = oldFree.assignedProjects.filter(pid => pid !== id);
             GoogleSheetsSync.upsertFreelancer(oldFree);
           }
         }
         if (newFreelancerId) {
-          const newFree = MockDataStore.freelancers.find(fl => fl.id === newFreelancerId);
+          const newFree = (MockDataStore.freelancers || []).find(fl => fl.id === newFreelancerId);
           if (newFree) {
             proj.assignedFreelancerId = newFree.id;
             proj.assignedFreelancerName = newFree.name;
@@ -3623,31 +4160,49 @@ function setupModalHandlers() {
         }
       }
 
-      // If status changed to Completed, archive in completedProjects
+      // If status is Completed, remove from Active projects and move to Completed Projects Archive
       if (proj.status === 'Completed') {
+        MockDataStore.projects = (MockDataStore.projects || []).filter(p => p.id !== id);
         if (!MockDataStore.completedProjects) MockDataStore.completedProjects = [];
-        if (!MockDataStore.completedProjects.some(cp => cp.id === proj.id)) {
-          const compItem = {
-            id: proj.id,
-            name: proj.name,
-            service: proj.service,
-            client: proj.client,
-            budget: proj.budget,
-            assignedFreelancerName: proj.assignedFreelancerName,
-            completionDate: new Date().toISOString().split('T')[0],
-            notes: proj.notes
-          };
+        const compDate = proj.completionDate || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const compItem = {
+          id: proj.id,
+          name: proj.name,
+          service: proj.service,
+          client: proj.client,
+          budget: proj.budget,
+          progress: 100,
+          status: 'Completed',
+          assignedFreelancerId: proj.assignedFreelancerId || null,
+          assignedFreelancerName: proj.assignedFreelancerName || 'Specialist',
+          completionDate: compDate,
+          notes: proj.notes || 'Delivered & verified'
+        };
+        const existingIdx = MockDataStore.completedProjects.findIndex(cp => cp.id === id);
+        if (existingIdx >= 0) {
+          MockDataStore.completedProjects[existingIdx] = compItem;
+        } else {
           MockDataStore.completedProjects.unshift(compItem);
-          GoogleSheetsSync.completeProject(compItem);
         }
+        GoogleSheetsSync.completeProject(compItem);
       } else {
+        // If status is Active/Planning/In Review, remove from Completed Projects and move to Active Sprints
+        MockDataStore.completedProjects = (MockDataStore.completedProjects || []).filter(cp => cp.id !== id);
+        if (!MockDataStore.projects) MockDataStore.projects = [];
+        const existingIdx = MockDataStore.projects.findIndex(p => p.id === id);
+        if (existingIdx >= 0) {
+          MockDataStore.projects[existingIdx] = proj;
+        } else {
+          MockDataStore.projects.unshift(proj);
+        }
         GoogleSheetsSync.upsertProject(proj);
       }
 
       StorageManager.save();
+      recalculateRealKPIs();
       renderAllViews();
       closeModal('modal-edit-project');
-      showToast(`Project ${proj.id} successfully updated`, 'success');
+      showToast(`Project ${proj.id} successfully updated & synced to Google Sheets!`, 'success');
     });
   }
 

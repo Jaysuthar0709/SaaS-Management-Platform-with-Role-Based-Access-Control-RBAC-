@@ -669,18 +669,61 @@ function doPost(e) {
       result.message = "Client " + c.id + " updated in Google Sheets";
     }
 
-    // 2. UPSERT PROJECT
-    else if (action === "upsert_project") {
+    // 2. UPSERT PROJECT & COMPLETE PROJECT (Separates active Projects and Completed Projects)
+    else if (action === "upsert_project" || action === "complete_project") {
       var p = payload.project || payload;
       var projSheet = getOrCreateSheet(ss, "Projects");
+      var compSheet = getOrCreateSheet(ss, "Completed Projects");
+      var isCompleted = (String(p.status || "").toLowerCase() === "completed") || (action === "complete_project");
+
+      if (isCompleted) {
+        // 1. Remove from active Projects sheet
+        deleteRowById(projSheet, 1, p.id);
+
+        // 2. Upsert into Completed Projects sheet
+        var compDate = p.completionDate || new Date().toISOString().split('T')[0];
+        var compRow = [
+          p.id, p.name, p.service || "Web Development", p.client || "",
+          Number(p.budget) || 0, p.assignedFreelancerName || "Unassigned",
+          compDate, p.notes || "Completed deliverable verified"
+        ];
+        upsertRow(compSheet, 1, p.id, compRow);
+
+        result.id = p.id;
+        result.message = "Project " + p.id + " moved from Projects to Completed Projects in Google Sheets";
+      } else {
+        // Active / Planning / In Review project -> remove from Completed Projects if previously there
+        deleteRowById(compSheet, 1, p.id);
+
+        var rowData = [
+          p.id, p.name, p.service || "Web Development", p.client || "",
+          Number(p.budget) || 0, Number(p.progress) || 0, p.status || "Active",
+          p.notes || "", p.assignedFreelancerId || "", p.assignedFreelancerName || "Unassigned", p.deadline || ""
+        ];
+        upsertRow(projSheet, 1, p.id, rowData);
+        result.id = p.id;
+        result.message = "Project " + p.id + " updated in active Projects Google Sheet";
+      }
+    }
+
+    // 2B. REOPEN / RESTORE PROJECT
+    else if (action === "reopen_project") {
+      var p = payload.project || payload;
+      var projSheet = getOrCreateSheet(ss, "Projects");
+      var compSheet = getOrCreateSheet(ss, "Completed Projects");
+
+      // Remove from Completed Projects
+      deleteRowById(compSheet, 1, p.id);
+
+      // Insert back into active Projects sheet
       var rowData = [
         p.id, p.name, p.service || "Web Development", p.client || "",
-        Number(p.budget) || 0, Number(p.progress) || 0, p.status || "Active",
-        p.notes || "", p.assignedFreelancerId || "", p.assignedFreelancerName || "Unassigned", p.deadline || ""
+        Number(p.budget) || 0, Number(p.progress) || 85, p.status || "In Review",
+        p.notes || "Project reopened from Completed archive", p.assignedFreelancerId || "", p.assignedFreelancerName || "Unassigned", p.deadline || ""
       ];
       upsertRow(projSheet, 1, p.id, rowData);
       result.id = p.id;
-      result.message = "Project " + p.id + " updated in Google Sheets";
+      result.message = "Project " + p.id + " reopened and restored to active Projects sheet";
     }
 
     // 3. UPSERT FREELANCER (Directory)
@@ -819,7 +862,11 @@ function doPost(e) {
       var targetSheetName = "";
       var type = (payload.itemType || "").toLowerCase();
       if (type.indexOf("client") !== -1) targetSheetName = "Clients";
-      else if (type.indexOf("proj") !== -1) targetSheetName = "Projects";
+      else if (type.indexOf("proj") !== -1) {
+        targetSheetName = "Projects";
+        var compSheet = ss.getSheetByName("Completed Projects");
+        if (compSheet) deleteRowById(compSheet, 1, payload.id);
+      }
       else if (type.indexOf("free") !== -1) {
         targetSheetName = "Freelancers";
         var faSheet = ss.getSheetByName("Freelancer Admin");
