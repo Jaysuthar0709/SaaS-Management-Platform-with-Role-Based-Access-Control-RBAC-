@@ -1237,9 +1237,14 @@ function setupSidebarControls() {
     };
   }
 
-  // Mobile Drawer Triggers
+  // Mobile Navigation Triggers
   if (mobileMenuBtn) mobileMenuBtn.onclick = (e) => { e.preventDefault(); toggleMobileSidebar(); };
-  if (mobileMoreBtn) mobileMoreBtn.onclick = (e) => { e.preventDefault(); toggleMobileSidebar(); };
+  if (mobileMoreBtn) {
+    mobileMoreBtn.onclick = (e) => {
+      e.preventDefault();
+      openModal('modal-mobile-more');
+    };
+  }
   if (sidebarMobileCloseBtn) sidebarMobileCloseBtn.onclick = (e) => { e.preventDefault(); closeMobileSidebar(); };
   if (sidebarBackdrop) sidebarBackdrop.onclick = (e) => { e.preventDefault(); closeMobileSidebar(); };
 
