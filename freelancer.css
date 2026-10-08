@@ -1205,3 +1205,322 @@
   background: #10b981;
   box-shadow: 0 0 6px #10b981;
 }
+
+/* ==========================================================================
+   Comprehensive Mobile & Tablet Responsive Optimizations
+   ========================================================================== */
+
+/* Tablet & Medium Screens (<= 1024px) */
+@media (max-width: 1024px) {
+  .timesheet-layout-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  
+  .projects-grid-container {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+}
+
+/* Mobile Devices & Folded Screens (<= 768px) */
+@media (max-width: 768px) {
+  /* Login View on Mobile */
+  .fl-login-fullscreen-section {
+    padding: 16px 14px;
+  }
+
+  .fl-login-fullscreen-section .login-card-wrapper {
+    max-width: 100%;
+  }
+
+  .fl-login-fullscreen-section .login-card {
+    padding: 28px 20px 22px;
+    border-radius: 16px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.9);
+  }
+
+  .portal-title {
+    font-size: 21px;
+  }
+
+  .portal-subtitle {
+    font-size: 12px;
+  }
+
+  /* Main Workspace Content Area */
+  .content-tab {
+    padding: 16px 14px calc(84px + env(safe-area-inset-bottom, 14px)) !important;
+  }
+
+  /* Projects Grid on Mobile (Single Column, Full-Width Cards) */
+  .projects-grid-container {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .fl-project-card {
+    padding: 16px 16px 14px;
+    border-radius: 12px;
+  }
+
+  .fl-proj-header {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .fl-proj-title {
+    font-size: 15px;
+  }
+
+  .fl-proj-client {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .fl-proj-meta-row {
+    padding: 8px 10px;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+
+  .fl-meta-label {
+    font-size: 10px;
+  }
+
+  .fl-meta-value {
+    font-size: 12px;
+  }
+
+  .fl-proj-notes {
+    font-size: 11.5px;
+    padding: 8px;
+    margin-bottom: 12px;
+  }
+
+  /* Interactive Actions on Mobile Project Card */
+  .fl-card-actions {
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .fl-card-actions > * {
+    width: 100%;
+  }
+
+  .fl-btn-submit-work,
+  .fl-btn-log-time,
+  .fl-btn-mark-complete {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 14px;
+    font-size: 12px;
+    justify-content: center;
+  }
+
+  /* Slider Row on Mobile */
+  .fl-quick-slider-wrap {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .fl-btn-save-prog {
+    min-height: 34px;
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  /* Metric Summary Cards on Mobile */
+  .subpage-metric-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px;
+    padding: 10px;
+    margin-top: 12px;
+  }
+
+  .sub-metric {
+    padding: 8px 10px;
+  }
+
+  .sub-label {
+    font-size: 10.5px;
+  }
+
+  .sub-value {
+    font-size: 15px;
+  }
+
+  /* Timesheet Layout on Mobile */
+  .timesheet-layout-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .timesheet-timer-card {
+    padding: 18px 14px;
+  }
+
+  /* Modals on Mobile (Bottom Sheet UX) */
+  .modal-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 90vh !important;
+    margin: 0 !important;
+    border-bottom: none !important;
+  }
+
+  .modal-header {
+    padding: 14px 18px 12px !important;
+  }
+
+  .modal-form {
+    padding: 14px 18px calc(24px + env(safe-area-inset-bottom, 12px)) !important;
+    max-height: calc(90vh - 70px);
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Google Pay Celebration Popup on Mobile */
+  .gpay-celebration-backdrop {
+    padding: 12px;
+  }
+
+  .gpay-celebration-card {
+    padding: 28px 18px 22px;
+    border-radius: 20px;
+    max-width: 100%;
+  }
+
+  .gpay-project-title {
+    font-size: 18px;
+  }
+
+  .gpay-status-pill-wrap {
+    padding: 10px 8px;
+    gap: 6px;
+  }
+
+  .gpay-metric-val {
+    font-size: 11.5px;
+  }
+}
+
+/* Compact Smartphones (<= 480px) */
+@media (max-width: 480px) {
+  /* Scaled Orbital Reactor Spinner on Small Phones */
+  .fl-orbital-spinner-stage {
+    width: 170px;
+    height: 170px;
+    margin-bottom: 22px;
+  }
+
+  .fl-hud-svg {
+    width: 160px;
+    height: 160px;
+  }
+
+  .fl-gyro-1 { width: 154px; height: 154px; }
+  .fl-gyro-2 { width: 140px; height: 140px; }
+  .fl-gyro-3 { width: 126px; height: 126px; }
+
+  .fl-hex-core-wrap {
+    width: 48px;
+    height: 48px;
+  }
+
+  .fl-hex-matrix-frame {
+    width: 44px;
+    height: 44px;
+  }
+
+  .fl-hex-svg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .fl-hex-core-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .fl-telemetry-hud-pod {
+    max-width: 320px;
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .fl-pct-digits {
+    font-size: 24px;
+  }
+
+  .fl-terminal-status-text {
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  .fl-stage-pips-matrix {
+    gap: 8px;
+  }
+
+  .fl-stage-pip-item {
+    font-size: 8.5px;
+    gap: 3px;
+  }
+
+  /* Summary Metrics Strip: Single Column on ultra-narrow phones */
+  .subpage-metric-strip {
+    grid-template-columns: 1fr !important;
+    gap: 6px;
+  }
+
+  /* Topbar Adjustments */
+  .topbar-left {
+    gap: 8px;
+  }
+
+  .breadcrumb-root,
+  .breadcrumb-sep {
+    display: none;
+  }
+
+  .breadcrumb-current {
+    font-size: 13px;
+  }
+
+  .topbar-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+}
+
+/* Folded / Ultra-narrow screens (<= 360px) */
+@media (max-width: 360px) {
+  .fl-login-fullscreen-section .login-card {
+    padding: 22px 14px 18px;
+  }
+
+  .portal-title {
+    font-size: 18px;
+  }
+
+  .fl-proj-title {
+    font-size: 14px;
+  }
+
+  .fl-btn-submit-work,
+  .fl-btn-log-time,
+  .fl-btn-mark-complete {
+    min-height: 38px;
+    font-size: 11.5px;
+  }
+}
