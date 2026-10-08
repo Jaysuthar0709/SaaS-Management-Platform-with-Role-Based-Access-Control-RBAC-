@@ -72,6 +72,59 @@ function sanitizeAdminUsers(list) {
   });
 }
 
+function sanitizeProjectsAndArchive() {
+  if (!Array.isArray(MockDataStore.projects)) MockDataStore.projects = [];
+  if (!Array.isArray(MockDataStore.completedProjects)) MockDataStore.completedProjects = [];
+
+  const activeOnly = [];
+  const completedMap = new Map();
+
+  // 1. Index existing completedProjects
+  MockDataStore.completedProjects.forEach(cp => {
+    if (cp && cp.id) {
+      const pidKey = String(cp.id).trim().toUpperCase();
+      completedMap.set(pidKey, Object.assign({}, cp, {
+        status: 'Completed',
+        progress: 100
+      }));
+    }
+  });
+
+  // 2. Iterate through projects: if status is 'Completed' or progress >= 100 with Completed status, move to completedProjects
+  MockDataStore.projects.forEach(p => {
+    if (!p || !p.id) return;
+    const pidKey = String(p.id).trim().toUpperCase();
+    const statusLower = String(p.status || '').trim().toLowerCase();
+    const isCompleted = statusLower === 'completed';
+
+    if (isCompleted) {
+      const compDate = p.completionDate || (completedMap.get(pidKey) ? completedMap.get(pidKey).completionDate : null) || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const compItem = {
+        id: p.id,
+        name: p.name || 'Deliverable',
+        service: p.service || 'Web Development',
+        client: p.client || '',
+        budget: Number(p.budget) || 0,
+        progress: 100,
+        status: 'Completed',
+        assignedFreelancerName: p.assignedFreelancerName || 'Specialist',
+        assignedFreelancerId: p.assignedFreelancerId || null,
+        completionDate: compDate,
+        notes: p.notes || 'Delivered & verified'
+      };
+      completedMap.set(pidKey, compItem);
+    } else {
+      // If it is active / in review / planning, ensure it is NOT in completedProjects
+      completedMap.delete(pidKey);
+      activeOnly.push(p);
+    }
+  });
+
+  MockDataStore.completedProjects = Array.from(completedMap.values());
+  // Active projects must NEVER contain any completed project
+  MockDataStore.projects = activeOnly.filter(p => !completedMap.has(String(p.id).trim().toUpperCase()) && String(p.status || '').trim().toLowerCase() !== 'completed');
+}
+
 function getStoredAdmins() {
   const map = new Map();
 
@@ -171,6 +224,9 @@ const StorageManager = {
           MockDataStore.adminUsers.push(adm);
         }
       });
+      // Ensure active projects and completed projects are cleanly partitioned
+      sanitizeProjectsAndArchive();
+
       if (typeof recalculateRealKPIs === 'function') {
         recalculateRealKPIs();
       }
@@ -388,6 +444,9 @@ const GoogleSheetsSync = {
         MockDataStore.freelancerDisbursements = Array.isArray(json.freelancerDisbursements) ? json.freelancerDisbursements.filter(x => !isDemoRecord(x)) : [];
         MockDataStore.completedProjects = Array.isArray(json.completedProjects) ? json.completedProjects.filter(x => !isDemoRecord(x)) : [];
         MockDataStore.deletedItems = Array.isArray(json.deletedItems) ? json.deletedItems.filter(x => !isDemoRecord(x)) : [];
+
+        // Ensure active projects and completed projects are cleanly partitioned
+        sanitizeProjectsAndArchive();
 
         // Dynamic recalculation of all KPIs and badges
         recalculateRealKPIs();
@@ -993,7 +1052,7 @@ function completeCinematicReveal() {
     if (dashboardViewEl) {
       dashboardViewEl.classList.remove('hidden');
       dashboardViewEl.style.opacity = '1';
-      dashboardViewEl.style.transform = 'scale(1)';
+      dashboardViewEl.style.transform = '';
     }
 
     // Update Topbar and Sidebar Profile UI
@@ -1293,6 +1352,7 @@ function startLiveClock() {
 
 // Dynamically recalculates KPI counts and totals strictly from actual live datasets
 function recalculateRealKPIs() {
+  sanitizeProjectsAndArchive();
   const projects = MockDataStore.projects || [];
   const completedProjectsList = MockDataStore.completedProjects || [];
   const clients = MockDataStore.clients || [];
@@ -1807,12 +1867,17 @@ function renderClientsTable(filterText = '', serviceFilter = 'all', statusFilter
 
 // 3. Projects Management View (Active Sprints)
 function renderProjectsTable(filterText = '', serviceFilter = 'all', statusFilter = 'all') {
+  sanitizeProjectsAndArchive();
   const tbody = document.getElementById('projects-table-body');
   if (!tbody) return;
 
   const fText = (filterText || '').toLowerCase();
   const filtered = (MockDataStore.projects || []).filter(p => {
     if (!p) return false;
+    const statusLower = String(p.status || '').toLowerCase();
+    // Active Sprints must NEVER display Completed projects
+    if (statusLower === 'completed') return false;
+
     const nameStr = String(p.name || '').toLowerCase();
     const idStr = String(p.id || '').toLowerCase();
     const clientStr = String(p.client || '').toLowerCase();
@@ -1824,7 +1889,7 @@ function renderProjectsTable(filterText = '', serviceFilter = 'all', statusFilte
       notesStr.includes(fText) ||
       flNameStr.includes(fText);
     const matchService = serviceFilter === 'all' || p.service === serviceFilter;
-    const matchStatus = statusFilter === 'all' || String(p.status || '').toLowerCase() === statusFilter.toLowerCase();
+    const matchStatus = statusFilter === 'all' || statusLower === statusFilter.toLowerCase();
     return matchSearch && matchService && matchStatus;
   });
 
@@ -1891,6 +1956,7 @@ function renderProjectsTable(filterText = '', serviceFilter = 'all', statusFilte
 
 // 3B. Completed Projects Archive Table View
 function renderCompletedProjectsTable(filterText = '', serviceFilter = 'all') {
+  sanitizeProjectsAndArchive();
   const tbody = document.getElementById('completed-projects-table-body');
   if (!tbody) return;
 
@@ -3277,6 +3343,7 @@ function markProjectComplete(projectId) {
     MockDataStore.completedProjects.unshift(compItem);
   }
 
+  sanitizeProjectsAndArchive();
   StorageManager.save();
   GoogleSheetsSync.completeProject(compItem);
   recalculateRealKPIs();
@@ -3313,6 +3380,7 @@ function reopenCompletedProject(projectId) {
 
   MockDataStore.projects.unshift(reopenedProj);
 
+  sanitizeProjectsAndArchive();
   StorageManager.save();
   GoogleSheetsSync.reopenProject(reopenedProj);
   recalculateRealKPIs();
@@ -4198,6 +4266,7 @@ function setupModalHandlers() {
         GoogleSheetsSync.upsertProject(proj);
       }
 
+      sanitizeProjectsAndArchive();
       StorageManager.save();
       recalculateRealKPIs();
       renderAllViews();
@@ -4705,7 +4774,7 @@ function bootApplication() {
     if (dashboardView) {
       dashboardView.classList.remove('hidden');
       dashboardView.style.opacity = '1';
-      dashboardView.style.transform = 'scale(1)';
+      dashboardView.style.transform = '';
     }
     if (AppState.currentAdmin) {
       updateAuthenticatedUserUI(AppState.currentAdmin);

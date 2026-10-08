@@ -90,7 +90,7 @@ html, body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 button, input, select, textarea {
@@ -816,7 +816,7 @@ a {
   background-color: var(--bg-core);
   position: relative;
   opacity: 1;
-  overflow-x: hidden;
+  overflow-x: clip;
   box-sizing: border-box;
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1324,7 +1324,7 @@ a {
   flex-direction: column;
   background-color: var(--bg-core);
   box-sizing: border-box;
-  overflow-x: hidden;
+  overflow-x: clip;
   transition: margin-left var(--transition-normal), width var(--transition-normal), max-width var(--transition-normal);
 }
 

@@ -68,6 +68,7 @@ const StorageManager = {
         if (Array.isArray(parsed.freelancers)) MockDataStore.freelancers = parsed.freelancers.filter(x => !isDemoRecord(x));
         if (Array.isArray(parsed.freelancerDisbursements)) MockDataStore.freelancerDisbursements = parsed.freelancerDisbursements.filter(x => !isDemoRecord(x));
         if (Array.isArray(parsed.freelancerCredentials)) MockDataStore.freelancerCredentials = parsed.freelancerCredentials.filter(x => !isDemoRecord(x));
+        if (Array.isArray(parsed.completedProjects)) MockDataStore.completedProjects = parsed.completedProjects.filter(x => !isDemoRecord(x));
         if (Array.isArray(parsed.adminUsers)) MockDataStore.adminUsers = parsed.adminUsers;
       }
       // Load timesheet logs
@@ -192,6 +193,7 @@ const GoogleSheetsSync = {
         }
         if (Array.isArray(json.clientPayments)) MockDataStore.clientPayments = json.clientPayments.filter(x => !isDemoRecord(x));
         if (Array.isArray(json.freelancerDisbursements)) MockDataStore.freelancerDisbursements = json.freelancerDisbursements.filter(x => !isDemoRecord(x));
+        if (Array.isArray(json.completedProjects)) MockDataStore.completedProjects = json.completedProjects.filter(x => !isDemoRecord(x));
         syncFreelancersToCredentials();
         StorageManager.save();
         if (typeof renderAllFreelancerViews === 'function' && FlState && FlState.isAuthenticated) {
@@ -300,8 +302,24 @@ class CinematicParticleEngine {
 
       this.ctx.beginPath();
       this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      this.ctx.fillStyle = `rgba(229, 9, 20, ${p.alpha})`;
+      this.ctx.fillStyle = `rgba(255, 42, 75, ${p.alpha})`;
       this.ctx.fill();
+
+      // Draw subtle connective cyber threads
+      for (let j = i + 1; j < particles.length; j++) {
+        const p2 = particles[j];
+        const dx = p.x - p2.x;
+        const dy = p.y - p2.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          this.ctx.beginPath();
+          this.ctx.moveTo(p.x, p.y);
+          this.ctx.lineTo(p2.x, p2.y);
+          this.ctx.strokeStyle = `rgba(229, 9, 20, ${0.12 * (1 - dist / 100)})`;
+          this.ctx.lineWidth = 0.6;
+          this.ctx.stroke();
+        }
+      }
     }
 
     this.animationFrameId = requestAnimationFrame(this.render);
@@ -597,21 +615,22 @@ function triggerFlCinematicSequence(fl) {
 }
 
 function executeFlLoadingTimeline(fl) {
-  const duration = 1500; // Smooth elegant cursive drawing & telemetry sync
+  const duration = 1600; // Smooth cybernetic orbital reactor acceleration
   const startTime = performance.now();
   const firstName = (fl && fl.name) ? fl.name.split(' ')[0] : 'Specialist';
 
   const stages = [
-    { threshold: 0, text: "◈ [TLS 1.3] Initializing Cryptographic Handshake...", stageIndex: 0 },
-    { threshold: 22, text: "◈ [TALENT] Validating Specialist Security Enclave...", stageIndex: 1 },
-    { threshold: 48, text: "◈ [VAULT] Decrypting Assigned Sprints & Escrow Ledger...", stageIndex: 2 },
-    { threshold: 74, text: "◈ [SYNC] Synchronizing Timesheet Enclave...", stageIndex: 3 },
-    { threshold: 95, text: `◈ [GRANTED] Session Verified. Welcome, ${firstName}`, stageIndex: 4 }
+    { threshold: 0, text: "◈ [TLS-256] Initializing Cryptographic Handshake...", stageIndex: 0 },
+    { threshold: 24, text: "◈ [SECURITY] Validating Specialist Security Enclave...", stageIndex: 1 },
+    { threshold: 50, text: "◈ [VAULT] Decrypting Assigned Sprints & Escrow Ledger...", stageIndex: 2 },
+    { threshold: 76, text: "◈ [SYNC] Synchronizing Timesheet & Work Telemetry...", stageIndex: 3 },
+    { threshold: 94, text: `◈ [ACCESS GRANTED] Session Verified. Welcome, ${firstName}`, stageIndex: 4 }
   ];
 
   const pctEl = document.getElementById('fl-loader-percentage');
   const progressBarEl = document.getElementById('fl-cursive-progress-bar');
   const statusEl = document.getElementById('fl-loader-status-text');
+  const hudArcEl = document.getElementById('fl-hud-arc');
 
   function frame(now) {
     const elapsed = now - startTime;
@@ -621,8 +640,16 @@ function executeFlLoadingTimeline(fl) {
     if (pctEl) pctEl.textContent = pct;
     if (progressBarEl) progressBarEl.style.width = `${pct}%`;
 
+    // 565.48 is circumference of r=90 circle
+    if (hudArcEl) {
+      const arcOffset = 565.48 - (progress * 565.48);
+      hudArcEl.style.strokeDashoffset = arcOffset;
+    }
+
+    let activeStageIdx = 0;
     for (let i = stages.length - 1; i >= 0; i--) {
       if (pct >= stages[i].threshold) {
+        activeStageIdx = stages[i].stageIndex;
         if (statusEl && statusEl.textContent !== stages[i].text) {
           statusEl.textContent = stages[i].text;
         }
@@ -630,10 +657,19 @@ function executeFlLoadingTimeline(fl) {
       }
     }
 
+    // Update Stage Pips
+    for (let s = 0; s < 5; s++) {
+      const pip = document.getElementById(`fl-pip-${s}`);
+      if (pip) {
+        pip.classList.toggle('active', s === activeStageIdx);
+        pip.classList.toggle('done', s < activeStageIdx);
+      }
+    }
+
     if (progress < 1) {
       requestAnimationFrame(frame);
     } else {
-      setTimeout(() => completeFlCinematicReveal(), 60);
+      setTimeout(() => completeFlCinematicReveal(), 80);
     }
   }
 
@@ -653,7 +689,7 @@ function completeFlCinematicReveal() {
     if (flWorkspaceView) {
       flWorkspaceView.classList.remove('hidden');
       flWorkspaceView.style.opacity = '1';
-      flWorkspaceView.style.transform = 'scale(1)';
+      flWorkspaceView.style.transform = '';
     }
 
     updateFreelancerProfileUI(FlState.currentFreelancer);
@@ -1493,7 +1529,7 @@ function bootFreelancerPortal() {
       if (flWorkspaceView) {
         flWorkspaceView.classList.remove('hidden');
         flWorkspaceView.style.opacity = '1';
-        flWorkspaceView.style.transform = 'scale(1)';
+        flWorkspaceView.style.transform = '';
       }
 
       updateFreelancerProfileUI(fl);

@@ -391,7 +391,7 @@ function doGet(e) {
       freelancerCredentials: readFreelancerAdminSheet(ss.getSheetByName("Freelancer Admin")),
       adminUsers: readAdminSheet(ss.getSheetByName("Admin")),
       paymentsData: readPaymentsSheet(ss.getSheetByName("Payments")),
-      completedProjects: readCompletedProjectsSheet(ss.getSheetByName("Completed Projects")),
+      completedProjects: readCompletedProjectsSheet(ss.getSheetByName("Completed Projects"), ss.getSheetByName("Projects")),
       deletedItems: readDeletedItemsSheet(ss.getSheetByName("Deleted Items")),
       loginActivity: readLoginActivitySheet(ss.getSheetByName("Login Activity"))
     };
@@ -444,6 +444,9 @@ function readProjectsSheet(sheet) {
   for (var r = 1; r < data.length; r++) {
     var row = data[r];
     if (!row[0]) continue;
+    var statusStr = String(row[6] || "Active").trim();
+    // Exclude completed projects from active Projects sheet query
+    if (statusStr.toLowerCase() === "completed") continue;
     list.push({
       id: String(row[0]),
       name: String(row[1] || ""),
@@ -451,7 +454,7 @@ function readProjectsSheet(sheet) {
       client: String(row[3] || ""),
       budget: Number(row[4]) || 0,
       progress: Number(row[5]) || 0,
-      status: String(row[6] || "Active"),
+      status: statusStr,
       notes: String(row[7] || ""),
       assignedFreelancerId: String(row[8] || ""),
       assignedFreelancerName: String(row[9] || "Unassigned"),
@@ -576,24 +579,54 @@ function readAdminSheet(sheet) {
   return list;
 }
 
-function readCompletedProjectsSheet(sheet) {
-  if (!sheet) return [];
-  var data = sheet.getDataRange().getValues();
+function readCompletedProjectsSheet(sheet, projSheet) {
   var list = [];
-  for (var r = 1; r < data.length; r++) {
-    var row = data[r];
-    if (!row[0]) continue;
-    list.push({
-      id: String(row[0]),
-      name: String(row[1] || ""),
-      service: String(row[2] || "Web Development"),
-      client: String(row[3] || ""),
-      budget: Number(row[4]) || 0,
-      assignedFreelancerName: String(row[5] || "Lead Specialist"),
-      completionDate: String(row[6] || ""),
-      notes: String(row[7] || "")
-    });
+  var seenIds = {};
+
+  if (sheet) {
+    var data = sheet.getDataRange().getValues();
+    for (var r = 1; r < data.length; r++) {
+      var row = data[r];
+      if (!row[0]) continue;
+      var id = String(row[0]).trim();
+      seenIds[id.toUpperCase()] = true;
+      list.push({
+        id: id,
+        name: String(row[1] || ""),
+        service: String(row[2] || "Web Development"),
+        client: String(row[3] || ""),
+        budget: Number(row[4]) || 0,
+        assignedFreelancerName: String(row[5] || "Lead Specialist"),
+        completionDate: String(row[6] || ""),
+        notes: String(row[7] || "")
+      });
+    }
   }
+
+  // Also catch any completed rows remaining in Projects sheet and merge
+  if (projSheet) {
+    var pData = projSheet.getDataRange().getValues();
+    for (var pr = 1; pr < pData.length; pr++) {
+      var pRow = pData[pr];
+      if (!pRow[0]) continue;
+      var pId = String(pRow[0]).trim();
+      var pStatus = String(pRow[6] || "").trim().toLowerCase();
+      if (pStatus === "completed" && !seenIds[pId.toUpperCase()]) {
+        seenIds[pId.toUpperCase()] = true;
+        list.push({
+          id: pId,
+          name: String(pRow[1] || ""),
+          service: String(pRow[2] || "Web Development"),
+          client: String(pRow[3] || ""),
+          budget: Number(pRow[4]) || 0,
+          assignedFreelancerName: String(pRow[9] || "Lead Specialist"),
+          completionDate: String(pRow[10] || new Date().toISOString().split('T')[0]),
+          notes: String(pRow[7] || "Completed deliverable")
+        });
+      }
+    }
+  }
+
   return list;
 }
 

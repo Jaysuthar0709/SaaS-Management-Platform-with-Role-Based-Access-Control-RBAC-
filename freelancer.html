@@ -22,9 +22,9 @@
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   <!-- ======================================================== -->
-  <!-- 1. FREELANCER LOGIN VIEW                                 -->
+  <!-- 1. FREELANCER LOGIN VIEW (Centered Layout) -->
   <!-- ======================================================== -->
-  <section id="freelancer-login-view" class="login-container" aria-label="Freelancer Authentication">
+  <section id="freelancer-login-view" class="fl-login-fullscreen-section" aria-label="Freelancer Authentication">
     <div class="login-bg-effects" aria-hidden="true">
       <div class="glow-orb orb-1"></div>
       <div class="glow-orb orb-2"></div>
@@ -83,7 +83,7 @@
                 type="text" 
                 id="fl-login-email" 
                 class="form-control" 
-                placeholder="e.g. aarav.sharma@freelance.apex.com or FL-101" 
+                placeholder="e.g. FL-101 or email" 
                 required 
                 spellcheck="false"
                 autocomplete="username"
@@ -154,17 +154,8 @@
           </button>
         </form>
 
-
-        <!-- Switch to Admin View link -->
-        <div style="margin-top: 12px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
-          <a href="index.html" style="font-size: 12px; color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-            <span>Are you a Platform Administrator?</span>
-            <span style="color: var(--red-ember); font-weight: 600;">Go to Admin Portal (index.html) &rarr;</span>
-          </a>
-        </div>
-
         <!-- Card Footer -->
-        <div class="login-card-footer" style="margin-top: 10px;">
+        <div class="login-card-footer" style="margin-top: 20px;">
           <div class="security-badges">
             <span>SOC2 Type II Certified</span>
             <span class="footer-sep">&bull;</span>
@@ -176,41 +167,120 @@
   </section>
 
   <!-- ======================================================== -->
-  <!-- 2. FULL-PAGE RED & BLACK CURSIVE CALLIGRAPHY LOADER      -->
+  <!-- 2. UNIQUE FREELANCER CYBERNETIC QUANTUM ORBITAL LOADER   -->
   <!-- ======================================================== -->
-  <div id="freelancer-cinematic-loader" class="cinematic-overlay hidden" aria-hidden="true" role="dialog">
-    <canvas id="fl-loader-canvas" class="loader-canvas"></canvas>
-    <div class="cursive-ambient-aura"></div>
+  <div id="freelancer-cinematic-loader" class="fl-quantum-loader-overlay hidden" aria-hidden="true" role="dialog">
+    <canvas id="fl-loader-canvas" class="fl-quantum-canvas"></canvas>
+    <div class="fl-quantum-ambient-radial"></div>
 
-    <div class="cursive-loader-container">
-      <div class="cursive-svg-wrap">
-        <svg class="cursive-loading-svg" viewBox="0 0 950 250" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="flCursiveRedNeonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#ff1744" />
-              <stop offset="25%" stop-color="#ff2a4b" />
-              <stop offset="50%" stop-color="#e50914" />
-              <stop offset="75%" stop-color="#ff416c" />
-              <stop offset="100%" stop-color="#ff0844" />
-            </linearGradient>
-          </defs>
+    <div class="fl-quantum-loader-content">
+      <!-- 3D Gyroscopic Quantum Orbital Spinner -->
+      <div class="fl-orbital-spinner-stage">
+        <!-- Outer Glowing Energy Ring -->
+        <div class="fl-orbital-outer-glow"></div>
 
-          <!-- Main Crisp Red Calligraphy Stroke -->
-          <path id="fl-cursive-loading-path" class="cursive-path-main" style="stroke: url(#flCursiveRedNeonGrad);" d="M 30,130 L 190,130 C 215,130 230,110 238,80 C 248,38 258,22 266,22 C 274,22 272,48 260,92 L 248,132 C 244,146 254,148 264,136 C 274,124 282,102 300,102 C 320,102 322,122 314,138 C 304,152 284,150 276,136 C 270,124 280,108 300,108 C 312,108 322,112 334,112 C 342,112 350,102 364,102 C 346,102 334,120 334,134 C 334,148 350,150 364,150 C 378,150 386,136 386,112 L 386,142 C 386,148 392,148 400,136 C 408,124 416,102 432,102 C 414,102 402,120 402,134 C 402,148 416,150 432,150 C 446,150 454,136 454,112 L 454,26 C 454,18 450,18 448,26 L 448,142 C 448,148 456,148 466,134 C 474,122 482,110 492,110 L 488,142 C 488,148 496,148 506,134 C 514,122 522,110 534,110 C 527,122 524,134 524,144 C 532,122 544,110 558,110 C 570,110 572,125 572,142 C 572,148 580,146 592,130 C 600,118 608,102 624,102 C 606,102 594,120 594,134 C 594,148 608,150 624,150 C 640,150 648,136 648,112 L 648,168 C 648,206 626,218 610,206 C 600,194 608,180 630,164 L 664,138 C 680,130 705,130 730,130 L 920,130" />
+        <!-- Segmented Tech HUD Ring -->
+        <div class="fl-hud-tech-ring">
+          <svg viewBox="0 0 200 200" class="fl-hud-svg">
+            <circle cx="100" cy="100" r="90" class="fl-hud-track-circle" />
+            <circle cx="100" cy="100" r="90" class="fl-hud-progress-arc" id="fl-hud-arc" />
+          </svg>
+          <div class="fl-hud-tick-marks">
+            <span class="fl-tick t-0"></span>
+            <span class="fl-tick t-90"></span>
+            <span class="fl-tick t-180"></span>
+            <span class="fl-tick t-270"></span>
+          </div>
+        </div>
 
-          <!-- Cursive 'i' Dot -->
-          <circle class="cursive-dot" cx="490" cy="84" r="4.5" fill="url(#flCursiveRedNeonGrad)" />
-        </svg>
+        <!-- 3D Orbital Gyroscopic Ring 1 (Tilted 65deg) -->
+        <div class="fl-gyro-ring fl-gyro-1">
+          <div class="fl-gyro-particle p-1"></div>
+          <div class="fl-gyro-particle p-2"></div>
+        </div>
+
+        <!-- 3D Orbital Gyroscopic Ring 2 (Counter Tilt 45deg) -->
+        <div class="fl-gyro-ring fl-gyro-2">
+          <div class="fl-gyro-particle p-3"></div>
+        </div>
+
+        <!-- 3D Orbital Gyroscopic Ring 3 (Fast Equatorial Sweep) -->
+        <div class="fl-gyro-ring fl-gyro-3">
+          <div class="fl-gyro-particle p-4"></div>
+        </div>
+
+        <!-- Central Hexagonal Quantum Matrix Core -->
+        <div class="fl-hex-core-wrap">
+          <div class="fl-hex-pulse-aura"></div>
+          <div class="fl-hex-matrix-frame">
+            <svg viewBox="0 0 60 60" class="fl-hex-svg">
+              <polygon points="30,4 55,18 55,42 30,56 5,42 5,18" class="fl-hex-poly-bg" />
+              <polygon points="30,4 55,18 55,42 30,56 5,42 5,18" class="fl-hex-poly-border" />
+            </svg>
+            <div class="fl-hex-core-icon">
+              <!-- Specialist Shield / Code Vector -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="cursive-metrics-pod">
-        <div class="cursive-percentage">
-          <span id="fl-loader-percentage">0</span><span class="cursive-pct-symbol">%</span>
+      <!-- Live Telemetry Matrix Pod & Progress HUD -->
+      <div class="fl-telemetry-hud-pod">
+        <div class="fl-hud-badge-row">
+          <span class="fl-hud-live-tag">
+            <span class="fl-hud-pulse-dot"></span>
+            SPECIALIST ENCLAVE
+          </span>
+          <span class="fl-hud-cipher-tag">TLS-256 SECURED</span>
         </div>
-        <div class="cursive-progress-track">
-          <div id="fl-cursive-progress-bar" class="cursive-progress-bar"></div>
+
+        <!-- Cyberpunk Digital Number Display -->
+        <div class="fl-telemetry-pct-row">
+          <span class="fl-pct-bracket">[</span>
+          <span id="fl-loader-percentage" class="fl-pct-digits">0</span>
+          <span class="fl-pct-unit">%</span>
+          <span class="fl-pct-bracket">]</span>
         </div>
-        <p id="fl-loader-status-text" class="cursive-status-text">INITIALIZING SPECIALIST ENCLAVE &bull; VERIFYING CREDENTIALS</p>
+
+        <!-- Precision Segmented Progress Bar -->
+        <div class="fl-segmented-bar-track">
+          <div id="fl-cursive-progress-bar" class="fl-segmented-bar-fill"></div>
+          <div class="fl-segmented-bar-grid"></div>
+        </div>
+
+        <!-- Live Status Terminal Decryption Text -->
+        <div class="fl-terminal-status-wrap">
+          <span class="fl-terminal-caret">&gt;</span>
+          <p id="fl-loader-status-text" class="fl-terminal-status-text">INITIALIZING SPECIALIST ENCLAVE &bull; VERIFYING TALENT</p>
+        </div>
+
+        <!-- Stage Pips Matrix -->
+        <div class="fl-stage-pips-matrix">
+          <div class="fl-stage-pip-item active" id="fl-pip-0">
+            <span class="pip-dot"></span>
+            <span class="pip-lbl">AUTH</span>
+          </div>
+          <div class="fl-stage-pip-item" id="fl-pip-1">
+            <span class="pip-dot"></span>
+            <span class="pip-lbl">ENCLAVE</span>
+          </div>
+          <div class="fl-stage-pip-item" id="fl-pip-2">
+            <span class="pip-dot"></span>
+            <span class="pip-lbl">SPRINTS</span>
+          </div>
+          <div class="fl-stage-pip-item" id="fl-pip-3">
+            <span class="pip-dot"></span>
+            <span class="pip-lbl">SYNC</span>
+          </div>
+          <div class="fl-stage-pip-item" id="fl-pip-4">
+            <span class="pip-dot"></span>
+            <span class="pip-lbl">GRANTED</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -370,12 +440,6 @@
             <span id="live-time">13:17:00</span>
             <span class="badge-timezone">UTC+5:30</span>
           </div>
-
-          <!-- Switch to Admin Dashboard link -->
-          <a href="index.html" class="topbar-icon-btn" title="Open Admin Portal" style="display:inline-flex; align-items:center; gap:5px; text-decoration:none; padding: 0 10px; width:auto; border-radius: 20px; font-size:11px; font-weight:600; border:1px solid rgba(255,255,255,0.12); color: var(--text-secondary); background: rgba(255,255,255,0.03);">
-            <span>Admin Portal</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-          </a>
 
           <!-- Profile Pill & Logout -->
           <div class="topbar-user-pill">
